@@ -2,18 +2,18 @@ import { ConnectButton } from '@mysten/dapp-kit'
 import { Link } from '@radix-ui/themes'
 import Balance from '@suiware/kit/Balance'
 import NetworkType from '@suiware/kit/NetworkType'
-import Logo from '~~/assets/logo.svg'
+import { Coffee } from 'lucide-react'
 
 const Header = () => {
   return (
     <header className="supports-backdrop-blur:bg-white/60 dark:border-slate-50/1 sticky top-0 z-40 flex w-full flex-row flex-wrap items-center justify-center gap-4 bg-white/95 px-3 py-3 backdrop-blur transition-colors duration-500 sm:justify-between sm:gap-3 lg:z-50 lg:border-b lg:border-slate-900/10 dark:bg-transparent">
       <Link
         href="#"
-        className="flex flex-col items-center justify-center gap-1 text-sds-dark outline-none hover:no-underline sm:flex-row dark:text-sds-light"
+        className="flex flex-row items-center justify-center gap-2 text-sds-dark outline-none hover:no-underline dark:text-sds-light"
       >
-        <img src={Logo} alt="Logo" className="h-12 w-12" />
+        <Coffee size={32} />
         <div className="pt-1 text-xl sm:text-2xl">
-          {import.meta.env.VITE_APP_NAME}
+          {import.meta.env.VITE_APP_NAME || 'My App'}
         </div>
       </Link>
 

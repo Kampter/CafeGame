@@ -1,3 +1,6 @@
 packages:
-  - 'packages/*'
+  - packages/*
   - '!**/test/**'
+ignoredBuiltDependencies:
+  - '@swc/core'
+  - esbuild
