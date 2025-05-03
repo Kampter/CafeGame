@@ -5,7 +5,8 @@ import {
   useRegisterGameMutation,
   useUnregisterGameMutation,
 } from '~~/dapp/hooks/useDashboardMutations'
-import { TrashIcon } from 'lucide-react' 
+import { TrashIcon } from 'lucide-react'
+import { Link as RouterLink } from 'react-router-dom'
 import Loading from '~~/components/Loading'
 
 interface DashboardManagerProps {
@@ -90,8 +91,10 @@ const DashboardManager: FC<DashboardManagerProps> = ({
           ) : (
             <ul className="list-disc space-y-1 pl-5">
               {gameIds.map((gameId) => (
-                <li key={gameId} className="flex items-center justify-between">
-                  <Text size="2" className="truncate font-mono" title={gameId}>{gameId}</Text>
+                <li key={gameId} className="flex items-center justify-between gap-2">
+                  <RouterLink to={`/games/${gameId}`} className="truncate hover:underline flex-grow min-w-0" title={`View Game: ${gameId}`}>
+                    <Text size="2" className="font-mono block truncate">{gameId}</Text>
+                  </RouterLink>
                   <IconButton 
                     size="1" 
                     variant="ghost" 

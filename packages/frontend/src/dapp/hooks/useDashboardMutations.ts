@@ -1,5 +1,7 @@
 import { SuiSignAndExecuteTransactionOutput } from '@mysten/wallet-standard'
-import useTransact from '@suiware/kit/useTransact'
+import {
+  useSignAndExecuteTransaction,
+} from '@mysten/dapp-kit'
 import { useState } from 'react'
 import { 
     CONTRACT_PACKAGE_VARIABLE_NAME,
@@ -10,7 +12,7 @@ import {
   prepareCreateDashboardTransaction,
   prepareRegisterGameTransaction,
   prepareUnregisterGameTransaction,
-} from '~~/dapp/helpers/dashboardTransactions' // Assuming this file will be created
+} from '~~/dapp/helpers/dashboardTransactions'
 import { transactionUrl } from '~~/helpers/network'
 import { notification } from '~~/helpers/notification'
 import useNetworkConfig from '~~/hooks/useNetworkConfig'
@@ -20,40 +22,52 @@ import useNetworkConfig from '~~/hooks/useNetworkConfig'
 export const useCreateDashboardMutation = (options?: {
   onSuccess?: (data: SuiSignAndExecuteTransactionOutput) => void
 }) => {
-  const [notificationId, setNotificationId] = useState<string>()
   const { useNetworkVariable } = useNetworkConfig()
   const explorerUrl = useNetworkVariable(EXPLORER_URL_VARIABLE_NAME)
   const packageId = useNetworkVariable(CONTRACT_PACKAGE_VARIABLE_NAME)
 
-  const mutation = useTransact({
-    onBeforeStart: () => {
-      if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
-          notification.error(null, 'Contract Package ID is not defined in config')
-          return false 
-      }
-      const nId = notification.txLoading()
-      setNotificationId(nId)
-      return true
-    },
-    onSuccess: (data: SuiSignAndExecuteTransactionOutput) => {
-      notification.txSuccess(
-        transactionUrl(explorerUrl, data.digest),
-        notificationId
-      )
-      options?.onSuccess?.(data) 
-    },
-    onError: (e: Error) => {
-      notification.txError(e, null, notificationId)
-    },
-  })
+  const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction()
 
   const createDashboard = (serviceName: string) => {
-    if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) return; 
-    const tx = prepareCreateDashboardTransaction(packageId, serviceName)
-    mutation.transact(tx)
+    if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
+        notification.error(null, 'Contract Package ID is not defined in config')
+        return; 
+    }
+    
+    let notificationId: string | undefined;
+    try {
+      notificationId = notification.txLoading()
+      const tx = prepareCreateDashboardTransaction(packageId, serviceName)
+      
+      signAndExecute(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: (result: SuiSignAndExecuteTransactionOutput) => {
+            notification.txSuccess(
+              transactionUrl(explorerUrl, result.digest),
+              notificationId
+            )
+            options?.onSuccess?.(result)
+          },
+          onError: (error: Error) => {
+            console.error('Transaction failed', error)
+            notification.txError(error, null, notificationId)
+          },
+        }
+      )
+    } catch (e) {
+      console.error('Error preparing transaction', e)
+      if (notificationId) {
+        notification.txError(e as Error, 'Error preparing transaction', notificationId)
+      } else {
+        notification.error(e as Error, 'Error preparing transaction')
+      }
+    }
   }
 
-  return { ...mutation, createDashboard }
+  return { createDashboard, isLoading: isPending }
 }
 
 // --- Register Game --- 
@@ -61,40 +75,49 @@ export const useCreateDashboardMutation = (options?: {
 export const useRegisterGameMutation = (options?: {
   onSuccess?: (data: SuiSignAndExecuteTransactionOutput) => void
 }) => {
-  const [notificationId, setNotificationId] = useState<string>()
   const { useNetworkVariable } = useNetworkConfig()
   const explorerUrl = useNetworkVariable(EXPLORER_URL_VARIABLE_NAME)
   const packageId = useNetworkVariable(CONTRACT_PACKAGE_VARIABLE_NAME)
-
-  const mutation = useTransact({
-    onBeforeStart: () => {
-      if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
-        notification.error(null, 'Contract Package ID is not defined in config')
-        return false 
-      }
-      const nId = notification.txLoading()
-      setNotificationId(nId)
-      return true
-    },
-    onSuccess: (data: SuiSignAndExecuteTransactionOutput) => {
-      notification.txSuccess(
-        transactionUrl(explorerUrl, data.digest),
-        notificationId
-      )
-      options?.onSuccess?.(data)
-    },
-    onError: (e: Error) => {
-      notification.txError(e, null, notificationId)
-    },
-  })
+  const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction()
 
   const registerGame = (dashboardObjectId: string, gameId: string) => {
-    if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) return;
-    const tx = prepareRegisterGameTransaction(packageId, dashboardObjectId, gameId)
-    mutation.transact(tx)
+    if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
+      notification.error(null, 'Contract Package ID is not defined in config')
+      return;
+    }
+    let notificationId: string | undefined;
+    try {
+      notificationId = notification.txLoading()
+      const tx = prepareRegisterGameTransaction(packageId, dashboardObjectId, gameId)
+      signAndExecute(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: (result: SuiSignAndExecuteTransactionOutput) => {
+            notification.txSuccess(
+              transactionUrl(explorerUrl, result.digest),
+              notificationId
+            )
+            options?.onSuccess?.(result)
+          },
+          onError: (error: Error) => {
+            console.error('Transaction failed', error)
+            notification.txError(error, null, notificationId)
+          },
+        }
+      )
+    } catch (e) {
+      console.error('Error preparing transaction', e)
+      if (notificationId) {
+        notification.txError(e as Error, 'Error preparing transaction', notificationId)
+      } else {
+        notification.error(e as Error, 'Error preparing transaction')
+      }
+    }
   }
 
-  return { ...mutation, registerGame }
+  return { registerGame, isLoading: isPending }
 }
 
 // --- Unregister Game --- 
@@ -102,38 +125,47 @@ export const useRegisterGameMutation = (options?: {
 export const useUnregisterGameMutation = (options?: {
   onSuccess?: (data: SuiSignAndExecuteTransactionOutput) => void
 }) => {
-  const [notificationId, setNotificationId] = useState<string>()
   const { useNetworkVariable } = useNetworkConfig()
   const explorerUrl = useNetworkVariable(EXPLORER_URL_VARIABLE_NAME)
   const packageId = useNetworkVariable(CONTRACT_PACKAGE_VARIABLE_NAME)
-
-  const mutation = useTransact({
-    onBeforeStart: () => {
-      if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
-        notification.error(null, 'Contract Package ID is not defined in config')
-        return false 
-      }
-      const nId = notification.txLoading()
-      setNotificationId(nId)
-      return true
-    },
-    onSuccess: (data: SuiSignAndExecuteTransactionOutput) => {
-      notification.txSuccess(
-        transactionUrl(explorerUrl, data.digest),
-        notificationId
-      )
-      options?.onSuccess?.(data)
-    },
-    onError: (e: Error) => {
-      notification.txError(e, null, notificationId)
-    },
-  })
+  const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction()
 
   const unregisterGame = (dashboardObjectId: string, gameId: string) => {
-    if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) return;
-    const tx = prepareUnregisterGameTransaction(packageId, dashboardObjectId, gameId)
-    mutation.transact(tx)
+    if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
+      notification.error(null, 'Contract Package ID is not defined in config')
+      return;
+    }
+    let notificationId: string | undefined;
+    try {
+      notificationId = notification.txLoading()
+      const tx = prepareUnregisterGameTransaction(packageId, dashboardObjectId, gameId)
+      signAndExecute(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: (result: SuiSignAndExecuteTransactionOutput) => {
+            notification.txSuccess(
+              transactionUrl(explorerUrl, result.digest),
+              notificationId
+            )
+            options?.onSuccess?.(result)
+          },
+          onError: (error: Error) => {
+            console.error('Transaction failed', error)
+            notification.txError(error, null, notificationId)
+          },
+        }
+      )
+    } catch (e) {
+      console.error('Error preparing transaction', e)
+      if (notificationId) {
+        notification.txError(e as Error, 'Error preparing transaction', notificationId)
+      } else {
+        notification.error(e as Error, 'Error preparing transaction')
+      }
+    }
   }
 
-  return { ...mutation, unregisterGame }
+  return { unregisterGame, isLoading: isPending }
 } 

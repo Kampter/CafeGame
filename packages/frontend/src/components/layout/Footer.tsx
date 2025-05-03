@@ -1,7 +1,11 @@
-import { useCurrentAccount } from '@mysten/dapp-kit'
+import {
+  useCurrentAccount,
+  useSuiClient,
+  useSuiClientContext,
+} from '@mysten/dapp-kit'
 import { Link } from '@radix-ui/themes'
-import Faucet from '@suiware/kit/Faucet'
-import { HeartIcon, SearchIcon } from 'lucide-react'
+import { Button } from '../ui/Button'
+import { HeartIcon, SearchIcon, DropletIcon } from 'lucide-react'
 import ThemeSwitcher from '~~/components/ThemeSwitcher'
 import {
   CONTRACT_PACKAGE_VARIABLE_NAME,
@@ -10,8 +14,37 @@ import {
 import { packageUrl } from '~~/helpers/network'
 import { notification } from '~~/helpers/notification'
 import useNetworkConfig from '~~/hooks/useNetworkConfig'
+import { FC, useState } from 'react'
 
-const Footer = () => {
+const CustomFaucetButton: FC = () => {
+  const currentAccount = useCurrentAccount()
+  const { network } = useSuiClientContext()
+
+  const isFaucetAvailable = network === 'devnet' || network === 'testnet' || network === 'localnet'
+  const faucetUrl = "https://faucet.sui.io/"
+
+  if (!currentAccount || !isFaucetAvailable) {
+    return null
+  }
+
+  const targetUrl = `${faucetUrl}?address=${currentAccount.address}`;
+
+  return (
+    <Button
+      asChild
+      variant="outline"
+      size="sm"
+      className="flex items-center gap-1"
+    >
+      <a href={targetUrl} target="_blank" rel="noopener noreferrer">
+        <DropletIcon className="h-4 w-4" />
+        <span>Request SUI</span>
+      </a>
+    </Button>
+  )
+}
+
+const Footer: FC = () => {
   const { useNetworkVariables } = useNetworkConfig()
   const networkVariables = useNetworkVariables()
   const explorerUrl = networkVariables[EXPLORER_URL_VARIABLE_NAME]
@@ -21,23 +54,18 @@ const Footer = () => {
   return (
     <footer className="flex w-full flex-col items-center justify-between gap-3 p-3 sm:flex-row sm:items-end">
       <div className="flex flex-row gap-3 lg:w-1/3">
-        {currentAccount != null && (
-          <>
-            <Faucet
-              onError={notification.error}
-              onSuccess={notification.success}
-            />
-            <Link
-              href={packageUrl(explorerUrl, packageId)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-row items-center gap-1"
-              highContrast={true}
-            >
-              <SearchIcon className="h-4 w-4" />
-              <span>Block Explorer</span>
-            </Link>
-          </>
+        <CustomFaucetButton />
+        {explorerUrl && packageId && packageId !== '0x0' && (
+          <Link
+            href={packageUrl(explorerUrl, packageId)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-row items-center gap-1"
+            highContrast={true}
+          >
+            <SearchIcon className="h-4 w-4" />
+            <span>Block Explorer</span>
+          </Link>
         )}
       </div>
 

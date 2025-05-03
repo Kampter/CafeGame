@@ -81,7 +81,9 @@
     "boilerplate",
     "starter",
     "starter-template",
-    "suiware"
+    "suiware",
+    "react-router-dom",
+    "seal"
   ],
   "license": "MIT",
   "workspaces": [

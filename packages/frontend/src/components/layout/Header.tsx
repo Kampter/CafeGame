@@ -1,35 +1,46 @@
+import React, { FC, useMemo } from 'react'
 import { ConnectButton } from '@mysten/dapp-kit'
 import { Link } from '@radix-ui/themes'
-import Balance from '@suiware/kit/Balance'
-import NetworkType from '@suiware/kit/NetworkType'
 import { Coffee } from 'lucide-react'
+import BalanceBadge from '../ui/BalanceBadge'
+import {
+  useCurrentAccount,
+  useSuiClientContext,
+  useSuiClientQuery,
+} from '@mysten/dapp-kit'
 
-const Header = () => {
+const Header: FC = () => {
+  const currentAccount = useCurrentAccount()
+  const ctx = useSuiClientContext()
+  const networkName = ctx.network
+
   return (
-    <header className="supports-backdrop-blur:bg-white/60 dark:border-slate-50/1 sticky top-0 z-40 flex w-full flex-row flex-wrap items-center justify-center gap-4 bg-white/95 px-3 py-3 backdrop-blur transition-colors duration-500 sm:justify-between sm:gap-3 lg:z-50 lg:border-b lg:border-slate-900/10 dark:bg-transparent">
-      <Link
-        href="#"
-        className="flex flex-row items-center justify-center gap-2 text-sds-dark outline-none hover:no-underline dark:text-sds-light"
-      >
-        <Coffee size={32} />
-        <div className="pt-1 text-xl sm:text-2xl">
-          {import.meta.env.VITE_APP_NAME || 'My App'}
-        </div>
-      </Link>
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center">
+        <Link href="/" className="mr-6 flex items-center space-x-2">
+          <Coffee className="h-6 w-6" />
+          <span className="font-bold">
+            {import.meta.env.VITE_APP_NAME || 'Sui DApp'}
+          </span>
+        </Link>
 
-      <div className="flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
-        <div className="flex flex-row items-center justify-center gap-3">
-          <Balance />
-          <NetworkType />
-        </div>
+        <nav className="flex items-center space-x-6 text-sm font-medium mr-6">
+          {/* <a href="#">Games</a> */}
+          {/* <a href="#">Reviews</a> */}
+        </nav>
 
-        {/* @todo: Find a better way to style ConnectButton for example through className, which is currently not supported. */}
-        {/* className="[&>button]:!px-4 [&>button]:!py-2 [&>div]:!text-base" */}
-        <div className="sds-connect-button-container">
+        <div className="ml-auto flex flex-shrink-0 items-center space-x-4">
+          {networkName && (
+            <div className="rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+              {networkName.toUpperCase()}
+            </div>
+          )}
+          <BalanceBadge className="text-sm" />
           <ConnectButton />
         </div>
       </div>
     </header>
   )
 }
+
 export default Header

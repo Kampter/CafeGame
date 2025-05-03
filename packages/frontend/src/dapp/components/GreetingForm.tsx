@@ -1,7 +1,14 @@
-import { useCurrentAccount } from '@mysten/dapp-kit'
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+} from '@mysten/dapp-kit'
 import { SuiSignAndExecuteTransactionOutput } from '@mysten/wallet-standard'
+import {
+  SuiTransactionBlockResponse,
+  SuiTransactionBlockResponseOptions,
+} from '@mysten/sui/client'
 import { Button, TextField } from '@radix-ui/themes'
-import useTransact from '@suiware/kit/useTransact'
 import { ChangeEvent, FC, MouseEvent, PropsWithChildren, useState } from 'react'
 import CustomConnectButton from '~~/components/CustomConnectButton'
 import Loading from '~~/components/Loading'
@@ -25,68 +32,72 @@ import {
 import { notification } from '~~/helpers/notification'
 import useNetworkConfig from '~~/hooks/useNetworkConfig'
 
-const GreetingForm = () => {
+const WAIT_FOR_TX_OPTIONS: SuiTransactionBlockResponseOptions = {
+  showEffects: true,
+  showObjectChanges: true,
+}
+
+const GreetingForm: FC = () => {
   const [name, setName] = useState<string>('')
   const currentAccount = useCurrentAccount()
-  const { data, isPending, error, refetch } = useOwnGreeting()
+  const { data, isPending: isQueryPending, error, refetch } = useOwnGreeting()
   const { useNetworkVariable } = useNetworkConfig()
   const packageId = useNetworkVariable(CONTRACT_PACKAGE_VARIABLE_NAME)
-  const [notificationId, setNotificationId] = useState<string>()
   const explorerUrl = useNetworkVariable(EXPLORER_URL_VARIABLE_NAME)
+  const client = useSuiClient()
 
-  const { transact: create } = useTransact({
-    onBeforeStart: () => {
-      const nId = notification.txLoading()
-      setNotificationId(nId)
-    },
-    onSuccess: (data: SuiSignAndExecuteTransactionOutput) => {
-      notification.txSuccess(
-        transactionUrl(explorerUrl, data.digest),
-        notificationId
-      )
-      refetch()
-    },
-    onError: (e: Error) => {
-      notification.txError(e, null, notificationId)
-    },
-  })
-  const { transact: greet } = useTransact({
-    onBeforeStart: () => {
-      const nId = notification.txLoading()
-      setNotificationId(nId)
-    },
-    onSuccess: (data: SuiSignAndExecuteTransactionOutput) => {
-      notification.txSuccess(
-        transactionUrl(explorerUrl, data.digest),
-        notificationId
-      )
-      refetch()
-    },
-    onError: (e: Error) => {
-      notification.txError(e, null, notificationId)
-    },
-  })
-  const { transact: reset } = useTransact({
-    onBeforeStart: () => {
-      const nId = notification.txLoading()
-      setNotificationId(nId)
-    },
-    onSuccess: (data: SuiSignAndExecuteTransactionOutput) => {
-      notification.txSuccess(
-        transactionUrl(explorerUrl, data.digest),
-        notificationId
-      )
-      refetch()
-    },
-    onError: (e: Error) => {
-      notification.txError(e, null, notificationId)
-    },
-  })
+  const { mutate: signAndExecute, isPending: isTxPending } = useSignAndExecuteTransaction()
 
   const handleCreateGreetingClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
+    if (!packageId) {
+      notification.error(null, 'Package ID not found')
+      return
+    }
 
-    create(prepareCreateGreetingTransaction(packageId))
+    let notificationId: string | undefined;
+    try {
+      notificationId = notification.txLoading()
+      const tx = prepareCreateGreetingTransaction(packageId)
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: (result) => {
+            client
+              .waitForTransaction({
+                digest: result.digest,
+                options: WAIT_FOR_TX_OPTIONS,
+              })
+              .then((txRes: SuiTransactionBlockResponse) => {
+                notification.txSuccess(
+                  transactionUrl(explorerUrl, result.digest),
+                  notificationId
+                )
+                refetch()
+              })
+              .catch((err: Error) => {
+                console.error('Error waiting for transaction', err)
+                notification.txError(
+                  err,
+                  'Error waiting for transaction confirmation',
+                  notificationId
+                )
+              })
+          },
+          onError: (error) => {
+            console.error('Create Greeting failed', error)
+            notification.txError(error, null, notificationId)
+          },
+        }
+      )
+    } catch (err) {
+      console.error('Error preparing create transaction', err)
+      if (notificationId) {
+        notification.txError(err as Error, 'Error preparing transaction', notificationId)
+      } else {
+        notification.error(err as Error, 'Error preparing transaction')
+      }
+    }
   }
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -99,13 +110,58 @@ const GreetingForm = () => {
       notification.error(null, 'Object ID is not valid')
       return
     }
-
     if (name.trim().length === 0) {
       notification.error(null, 'Name cannot be empty')
       return
     }
+    if (!packageId) {
+      notification.error(null, 'Package ID not found')
+      return
+    }
 
-    greet(prepareSetGreetingTransaction(packageId, objectId, name))
+    let notificationId: string | undefined;
+    try {
+      notificationId = notification.txLoading()
+      const tx = prepareSetGreetingTransaction(packageId, objectId, name)
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: (result) => {
+            client
+              .waitForTransaction({
+                digest: result.digest,
+                options: WAIT_FOR_TX_OPTIONS,
+              })
+              .then((txRes: SuiTransactionBlockResponse) => {
+                notification.txSuccess(
+                  transactionUrl(explorerUrl, result.digest),
+                  notificationId
+                )
+                refetch()
+              })
+              .catch((err: Error) => {
+                console.error('Error waiting for transaction', err)
+                notification.txError(
+                  err,
+                  'Error waiting for transaction confirmation',
+                  notificationId
+                )
+              })
+          },
+          onError: (error) => {
+            console.error('Set Greeting failed', error)
+            notification.txError(error, null, notificationId)
+          },
+        }
+      )
+    } catch (err) {
+      console.error('Error preparing set greeting transaction', err)
+      if (notificationId) {
+        notification.txError(err as Error, 'Error preparing transaction', notificationId)
+      } else {
+        notification.error(err as Error, 'Error preparing transaction')
+      }
+    }
   }
 
   const handleReset = (objectId: string | null | undefined) => {
@@ -113,15 +169,60 @@ const GreetingForm = () => {
       notification.error(null, 'Object ID is not valid')
       return
     }
+    if (!packageId) {
+      notification.error(null, 'Package ID not found')
+      return
+    }
 
-    reset(prepareResetGreetingTransaction(packageId, objectId))
+    let notificationId: string | undefined;
+    try {
+      notificationId = notification.txLoading()
+      const tx = prepareResetGreetingTransaction(packageId, objectId)
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: (result) => {
+            client
+              .waitForTransaction({
+                digest: result.digest,
+                options: WAIT_FOR_TX_OPTIONS,
+              })
+              .then((txRes: SuiTransactionBlockResponse) => {
+                notification.txSuccess(
+                  transactionUrl(explorerUrl, result.digest),
+                  notificationId
+                )
+                refetch()
+              })
+              .catch((err: Error) => {
+                console.error('Error waiting for transaction', err)
+                notification.txError(
+                  err,
+                  'Error waiting for transaction confirmation',
+                  notificationId
+                )
+              })
+          },
+          onError: (error) => {
+            console.error('Reset Greeting failed', error)
+            notification.txError(error, null, notificationId)
+          },
+        }
+      )
+    } catch (err) {
+      console.error('Error preparing reset transaction', err)
+      if (notificationId) {
+        notification.txError(err as Error, 'Error preparing transaction', notificationId)
+      } else {
+        notification.error(err as Error, 'Error preparing transaction')
+      }
+    }
   }
 
   if (currentAccount == null) return <CustomConnectButton />
 
-  if (isPending) return <Loading />
+  if (isQueryPending || isTxPending) return <Loading />
 
-  // @todo: Handle the following errors with toasts.
   if (error) return <TextMessage>Error: {error.message}</TextMessage>
 
   if (!data.data) return <TextMessage>Not found</TextMessage>

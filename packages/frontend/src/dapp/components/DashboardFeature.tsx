@@ -8,7 +8,7 @@ import CustomConnectButton from '~~/components/CustomConnectButton'
 import { Flex, Heading, Text, Separator } from '@radix-ui/themes' // Added Separator
 
 // Hardcoded Dashboard Object ID
-const HARDCODED_DASHBOARD_ID = '0xdb720cc18a9ccbc55b49e3d8f33eb54dfacdf01225f3162d69aba4716e2b6c18';
+const HARDCODED_DASHBOARD_ID = '0x1bfc7b04b6accc3b32d380d2202211571a70bb8efb8ee728d59bd5dcc76b648d';
 
 // Removed getResponseObjectId helper as it's no longer needed here
 

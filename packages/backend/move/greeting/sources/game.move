@@ -2,13 +2,13 @@
 /// Manages game entities, reviews, guides, purchase access (vector-based), and on-chain access verification.
 module greeting::game;
 
-use std::string::{Self, String, utf8};
+use std::string::{String, utf8};
 use sui::balance::{Self, Balance};
 use sui::transfer::{public_transfer};
 use sui::object_table::{Self, ObjectTable}; // Keep for reviews/guides table
 use sui::sui::SUI;
 use sui::clock::{Clock};
-use sui::dynamic_object_field as df;
+use sui::dynamic_field as of; // Change alias from df to of
 use sui::coin::{Self, Coin}; // Import Coin and coin module
 use greeting::review::{Self, Review};
 use greeting::guide::{Self, Guide, GuideType};
@@ -23,6 +23,8 @@ const EInsufficientPayment: u64 = 1;
 const EAlreadyPurchased: u64 = 2;
 /// Access denied for the requested resource, either due to lack of purchase or invalid resource ID prefix.
 const ENoAccess: u64 = 3; // New error code for access verification
+/// Error for already voted/liked
+const EVotedAlready: u64 = 4;
 
 // === Structs ===
 
@@ -67,6 +69,18 @@ public struct GuideIssued has key, store {
     title: String, 
 }
 
+/// Key for dynamic fields tracking review votes.
+public struct ReviewVoteKey has store, copy, drop {
+    user: address,
+    review_id: ID,
+}
+
+/// Key for dynamic fields tracking guide likes.
+public struct GuideLikeKey has store, copy, drop {
+    user: address,
+    guide_id: ID,
+}
+
 /// Represents a game on the platform.
 public struct Game has key, store {
     id: UID,
@@ -99,7 +113,7 @@ public struct Game has key, store {
     price: u64,
     description: String,
     /// URL or identifier pointing to the game package stored off-chain (e.g., Walrus).
-    game_package_url: String,
+    game_package_bolb_id: String,
 }
 
 // === Public Entry Functions ===
@@ -118,7 +132,7 @@ public struct Game has key, store {
 /// # Returns
 /// * The `ID` of the newly created Game object.
 #[allow(lint(self_transfer))]
-public entry fun create_game(name: String, genre: String, platform: String, price: u64, description: String, ctx: &mut TxContext): ID {
+public entry fun create_game(name: String, genre: String, platform: String, price: u64, description: String, game_package_bolb_id: String, ctx: &mut TxContext): ID {
     let id = object::new(ctx);
     let game_id = id.to_inner();
 
@@ -139,7 +153,7 @@ public entry fun create_game(name: String, genre: String, platform: String, pric
         platform,
         price,
         description,
-        game_package_url: string::utf8(b""),
+        game_package_bolb_id
     };
 
     let admin_cap = AdminCap {
@@ -210,9 +224,9 @@ public entry fun remove_access(game: &mut Game, user_to_remove: address, admin_c
 ///
 /// # Aborts
 /// * If `admin_cap` is not valid for this game (`EInvalidPermission`).
-public entry fun update_package_url(game: &mut Game, new_url: String, admin_cap: &AdminCap) {
+public entry fun update_package_url(game: &mut Game, new_blob_id_str: String, admin_cap: &AdminCap) {
     assert!(admin_cap.game_id == &game.id.to_inner(), EInvalidPermission);
-    game.game_package_url = new_url;
+    game.game_package_bolb_id = new_blob_id_str;
 }
 
 /// Creates a new review for the game, consuming a ProofOfDuration.
@@ -329,7 +343,7 @@ public entry fun register_guide_id(
         
     // Check if a GuideIssued DF already exists for this ID
     // We should only increment num_guides and add DF if it's truly a new registration
-    if (!df::exists_(&game.id, guide_id)) {
+    if (!of::exists_(&game.id, guide_id)) {
         // Increment guide count regardless of presence in the object table
         game.num_guides = game.num_guides + 1;
         
@@ -340,7 +354,7 @@ public entry fun register_guide_id(
             time_issued: 0, // Placeholder timestamp
             title: utf8(b"Registered ID"), // Placeholder title
         };
-        df::add(&mut game.id, guide_id, guide_association);
+        of::add(&mut game.id, guide_id, guide_association);
     }
 }
 
@@ -421,86 +435,144 @@ public entry fun generate_proof_of_duration(game_id: ID, duration: u64, ctx: &mu
 ///
 /// # Aborts
 /// * If the sender is not in the game's access list or if the resource_id does not have the game ID as a prefix (`ENoAccess`).
-public entry fun verify_game_access(game: &Game, resource_id: vector<u8>, ctx: &TxContext) {
+public entry fun seal_approve_access(game: &Game, resource_id: vector<u8>, ctx: &TxContext) {
     assert!(approve_access(game, ctx.sender(), resource_id), ENoAccess);
     // If the assert passes, the transaction continues, proving access for this context.
 }
 
-// === Internal Functions ===
-
-/// Internal helper function to add a review to the game state.
-/// Updates review count, total rating, overall rating, adds to ObjectTable,
-/// and adds a ReviewIssued dynamic field.
-///
-/// # Arguments
-/// * `game`: Mutable reference to the `Game` object.
-/// * `owner`: The address of the review author.
-/// * `rating`: The rating given in the review.
-/// * `review`: The `Review` object itself.
-/// * `ctx`: The transaction context.
-fun add_review(game: &mut Game, owner: address, rating: u64, review: Review, ctx: &mut TxContext) {
-    let review_id = review.get_id();
-    let time_issued = review.get_time_issued();
-
-    // Add the full review object to the table
-    game.reviews.add(review_id, review);
-    
-    // Add issuance info as a dynamic field for potential indexing/querying
-    let reviewIssued = ReviewIssued { 
-        id: object::new(ctx), 
-        owner,
-        rating,
-        time_issued 
-    };
-    // Keyed by review_id for lookup
-    df::add(&mut game.id, review_id, reviewIssued);
-
-    // Update aggregates
+/// Adds a review object to the game's review table and updates game stats.
+/// This function is now internal (`public(package)`) as review creation should go through `create_review` or `create_review_no_pod`.
+public(package) fun add_review(game: &mut Game, owner: address, rating: u64, review: Review, _ctx: &mut TxContext) {
+    let review_id = object::id(&review);
+    object_table::add(&mut game.reviews, review_id, review);
     game.num_reviews = game.num_reviews + 1;
     game.total_rate = game.total_rate + rating;
-    // Prevent division by zero if num_reviews was somehow 0 before incrementing (shouldn't happen here)
-    if (game.num_reviews > 0) { 
-        game.overall_rate = game.total_rate / game.num_reviews;
-    }
+    game.overall_rate = game.total_rate / game.num_reviews; // Recalculate overall rating
+
+    // Potentially update top_reviews list (logic omitted for brevity)
+
+    // Add a ReviewIssued event as a dynamic object field
+    // Note: Removed redundant time_issued here, assuming Review already has it.
+    //       If ReviewIssued needs its own ID separate from Review ID, keep object::new(ctx)
+    //       Otherwise, consider if this DF is necessary if Review itself is in ObjectTable.
+    //       Keeping it simple for now.
+    // let review_issued_event = ReviewIssued {
+    //     id: object::new(ctx), // ID for the event itself
+    //     owner, 
+    //     rating,
+    // };
+    // of::add(&mut game.id, review_id, review_issued_event);
 }
 
-/// Internal helper function to add a guide to the game state.
-/// Updates guide count, adds to ObjectTable, adds a GuideIssued dynamic field,
-/// and potentially adds to recommended_guides if it's the first guide.
+/// Adds a guide object to the game's guide table and updates game stats.
+/// This function is now internal (`public(package)`) as guide creation should go through `create_guide`.
+public(package) fun add_guide(game: &mut Game, guide: Guide, _ctx: &mut TxContext) {
+    let guide_id = object::id(&guide);
+    object_table::add(&mut game.guides, guide_id, guide);
+    game.num_guides = game.num_guides + 1;
+
+    // Add a GuideIssued event as a dynamic object field
+    // Similar notes as add_review regarding redundancy and necessity of this DF.
+    // let guide_issued_event = GuideIssued {
+    //     id: object::new(ctx), // ID for the event itself
+    //     owner: guide::get_owner(&guide), // Assuming function exists
+    //     title: guide::get_title(&guide), // Assuming function exists
+    // };
+    // of::add(&mut game.id, guide_id, guide_issued_event);
+}
+
+// === Access Controlled Voting/Liking ===
+
+/// Entry function to upvote a review. Checks if the user has already voted.
+public entry fun upvote_review(game: &mut Game, review_id: ID, ctx: &mut TxContext) {
+    let user = ctx.sender();
+    let key = ReviewVoteKey { user, review_id };
+
+    // Check if the user has already voted on this review using dynamic object field
+    assert!(
+        !of::exists_with_type<ReviewVoteKey, bool>(&game.id, key),
+        EVotedAlready
+    );
+
+    // Add a field to mark that the user has voted. The value (true) doesn't matter much.
+    of::add(&mut game.id, key, true);
+
+    // Borrow the Review object mutably from the ObjectTable
+    let review = object_table::borrow_mut(&mut game.reviews, review_id);
+    // Call the internal upvote function in the review module
+    review::upvote(review);
+}
+
+/// Entry function to downvote a review. Checks if the user has already voted.
+public entry fun downvote_review(game: &mut Game, review_id: ID, ctx: &mut TxContext) {
+    let user = ctx.sender();
+    let key = ReviewVoteKey { user, review_id };
+
+    // Check if the user has already voted on this review
+    assert!(
+        !of::exists_with_type<ReviewVoteKey, bool>(&game.id, key),
+        EVotedAlready
+    );
+
+    // Mark that the user has voted
+    of::add(&mut game.id, key, true);
+
+    let review = object_table::borrow_mut(&mut game.reviews, review_id);
+    review::downvote(review);
+}
+
+/// Entry function to like a guide. Checks if the user has already liked.
+public entry fun like_guide(game: &mut Game, guide_id: ID, ctx: &mut TxContext) {
+    let user = ctx.sender();
+    let key = GuideLikeKey { user, guide_id };
+
+    // Check if the user has already liked this guide
+    assert!(
+        !of::exists_with_type<GuideLikeKey, bool>(&game.id, key),
+        EVotedAlready
+    );
+
+    // Mark that the user has liked
+    of::add(&mut game.id, key, true);
+
+    let guide = object_table::borrow_mut(&mut game.guides, guide_id);
+    guide::like_guide(guide);
+}
+
+// === Public View Functions ===
+
+/// Checks if a given user address has purchased access to the game (is in the access list vector).
 ///
 /// # Arguments
-/// * `game`: Mutable reference to the `Game` object.
-/// * `guide`: The `Guide` object itself.
-/// * `ctx`: The transaction context.
-fun add_guide(game: &mut Game, guide: Guide, ctx: &mut TxContext) {
-    let guide_id = guide.get_id();
-    let owner = guide.get_owner();
-    let time_issued = guide.get_created_at();
-    let title = guide.get_title();
+/// * `game`: Immutable reference to the `Game` object.
+/// * `user`: The address to check.
+///
+/// # Returns
+/// * `true` if the user is in the access list, `false` otherwise.
+public fun has_purchased(game: &Game, user: address): bool {
+    vector::contains(&game.access_list, &user)
+}
 
-    // Add the full guide object to the table
-    game.guides.add(guide_id, guide);
-    
-    // Add issuance info as a dynamic field
-    let guideIssued = GuideIssued { 
-        id: object::new(ctx), 
-        owner, 
-        time_issued,
-        title,
-    };
-    // Keyed by guide_id for lookup
-    df::add(&mut game.id, guide_id, guideIssued);
+/// Returns the price of the game.
+public fun get_price(game: &Game): u64 {
+    game.price
+}
 
-    // Update aggregates
-    game.num_guides = game.num_guides + 1;
-    
-    // Add the first guide automatically to recommended? Consider if this is desired behavior.
-    if (game.num_guides == 1) {
-        // Check if it wasn't already added by register_guide_id somehow
-        if (!vector::contains(&game.recommended_guides, &guide_id)) {
-            game.recommended_guides.push_back(guide_id);
-        }
-    }
+/// Returns the game package URL.
+public fun get_package_url(game: &Game): String {
+    game.game_package_bolb_id // Returns a copy
+}
+
+/// Returns the current balance of the reward pool.
+public fun get_reward_pool_balance(game: &Game): u64 {
+    balance::value(&game.reward_pool)
+}
+
+/// Returns a copy of the access list vector.
+/// Note: This can be large and potentially expensive to call.
+/// Consider alternative patterns (e.g., events, paginated reads) if needed for off-chain use.
+public fun get_access_list(game: &Game): vector<address> {
+    *&game.access_list // Returns a copy of the vector
 }
 
 /// Checks if a user has purchased the game AND if the resource ID belongs to this game's namespace.
@@ -549,40 +621,4 @@ fun is_prefix(prefix: vector<u8>, word: vector<u8>): bool {
         i = i + 1;
     };
     true
-}
-
-// === Public View Functions ===
-
-/// Checks if a given user address has purchased access to the game (is in the access list vector).
-///
-/// # Arguments
-/// * `game`: Immutable reference to the `Game` object.
-/// * `user`: The address to check.
-///
-/// # Returns
-/// * `true` if the user is in the access list, `false` otherwise.
-public fun has_purchased(game: &Game, user: address): bool {
-    vector::contains(&game.access_list, &user)
-}
-
-/// Returns the price of the game.
-public fun get_price(game: &Game): u64 {
-    game.price
-}
-
-/// Returns the game package URL.
-public fun get_package_url(game: &Game): String {
-    game.game_package_url // Returns a copy
-}
-
-/// Returns the current balance of the reward pool.
-public fun get_reward_pool_balance(game: &Game): u64 {
-    balance::value(&game.reward_pool)
-}
-
-/// Returns a copy of the access list vector.
-/// Note: This can be large and potentially expensive to call.
-/// Consider alternative patterns (e.g., events, paginated reads) if needed for off-chain use.
-public fun get_access_list(game: &Game): vector<address> {
-    *&game.access_list // Returns a copy of the vector
 }

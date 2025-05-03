@@ -245,7 +245,7 @@ fun view_guide(guide: &mut Guide) {
 }
 
 /// Internal helper to increment the like count.
-fun like_guide(guide: &mut Guide) {
+public(package) fun like_guide(guide: &mut Guide) {
     // Consider potential overflow.
     guide.likes = guide.likes + 1;
 }
