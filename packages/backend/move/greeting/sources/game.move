@@ -8,10 +8,11 @@ use sui::transfer::{public_transfer};
 use sui::object_table::{Self, ObjectTable}; // Keep for reviews/guides table
 use sui::sui::SUI;
 use sui::clock::{Clock};
+use sui::event; // Import event module
 use sui::dynamic_field as of; // Change alias from df to of
 use sui::coin::{Self, Coin}; // Import Coin and coin module
 use greeting::review::{Self, Review};
-use greeting::guide::{Self, Guide, GuideType};
+use greeting::guide::{Self, Guide, GuideType, code_to_guide_type};
 
 // === Errors ===
 
@@ -48,8 +49,7 @@ public struct ProofOfDuration has key, store {
 
 /// Represents the event of a review being issued for a game.
 /// Stored as a dynamic field on the Game object, keyed by the Review ID.
-public struct ReviewIssued has key, store {
-    id: UID,
+public struct ReviewIssued has copy, store, drop {
     owner: address,
     /// The rating given in the review.
     rating: u64, 
@@ -59,8 +59,7 @@ public struct ReviewIssued has key, store {
 
 /// Represents the event of a guide being issued for a game.
 /// Stored as a dynamic field on the Game object, keyed by the Guide ID.
-public struct GuideIssued has key, store {
-    id: UID,
+public struct GuideIssued has copy, store, drop {
     /// The address of the guide author.
     owner: address,
     /// Timestamp (from Clock) when the guide was created.
@@ -282,40 +281,47 @@ public entry fun create_review_without_pod(
 }
 
 /// Creates a new guide for the game and adds it to the game's guide table.
-/// Takes a numerical code and optional custom string to determine the guide type.
 ///
 /// # Arguments
 /// * `game`: Mutable reference to the `Game` object.
-/// * `owner`: The address of the guide author.
 /// * `title`: The title of the guide.
 /// * `content`: The main content of the guide.
-/// * `guide_type_code`: A numerical code representing the `GuideType` (0-5 for predefined, other for custom).
-/// * `custom_type`: The string for the custom type, used only if `guide_type_code` is not 0-5.
+/// * `guide_type`: The type of guide (e.g., Walkthrough, Tips).
 /// * `clock`: A reference to the `Clock` object for timestamps.
 /// * `ctx`: The transaction context.
+///
+/// # Aborts
+/// * Aborts if `guide::create_guide` aborts (e.g., invalid content length).
 public entry fun create_guide_for_game(
     game: &mut Game,
-    owner: address,
     title: String,
     content: String,
-    guide_type_code: u8,   // Changed parameter back to u8 code
+    guide_type_code: u8,
     clock: &Clock,
-    ctx: &mut TxContext
+    ctx: &mut TxContext,
 ) {
-    // Convert the code and custom string back to the GuideType enum internally
+    // Convert the u8 code to the GuideType enum using the imported function
     let guide_type: GuideType = guide::code_to_guide_type(guide_type_code);
 
-    // Call the package-private create_guide function from the guide module
-    let guide = guide::create_guide(
+    let owner = ctx.sender(); 
+    let game_id = object::id(game); 
+
+    // Create the Guide object using the function from the guide module
+    let guide = guide::create_guide(owner, game_id, title, content, guide_type, clock, ctx);
+    
+    // Get the ID of the newly created Guide object
+    let guide_object_id = object::id(&guide);
+
+    // Add the guide to the ObjectTable using its own ID as the key
+    object_table::add(&mut game.guides, guide_object_id, guide);
+    game.num_guides = game.num_guides + 1;
+
+    // Emit the event
+    event::emit(GuideIssued {
         owner,
-        game.id.to_inner(), 
+        time_issued: clock.timestamp_ms(),
         title,
-        content,
-        guide_type, // Pass the constructed GuideType enum
-        clock,
-        ctx
-    );
-    add_guide(game, guide, ctx); 
+    });
 }
 
 /// Allows anyone to register an arbitrary Guide ID with the game.
@@ -349,7 +355,6 @@ public entry fun register_guide_id(
         
         // Add a dynamic field association, using placeholder data as the actual Guide is not accessed.
         let guide_association = GuideIssued { 
-            id: object::new(ctx), 
             owner: tx_context::sender(ctx), // Assume sender is associating this ID
             time_issued: 0, // Placeholder timestamp
             title: utf8(b"Registered ID"), // Placeholder title
@@ -588,7 +593,7 @@ public fun get_access_list(game: &Game): vector<address> {
 fun approve_access(game: &Game, user: address, resource_id: vector<u8>): bool {
     // Check 1: Is the resource ID prefixed by the game ID?
     // Convert game object ID to bytes to use as the namespace prefix
-    let namespace = object::id_to_bytes(&game.id.to_inner());
+    let namespace = object::id_to_bytes(&object::id(game)); // Use object::id directly on &Game
     if (!is_prefix(namespace, resource_id)) {
         return false
     };
@@ -598,7 +603,6 @@ fun approve_access(game: &Game, user: address, resource_id: vector<u8>): bool {
 }
 
 /// Returns true if `prefix` is a prefix of `word`.
-/// Based on walrus::utils::is_prefix
 ///
 /// # Arguments
 /// * `prefix`: The potential prefix vector.

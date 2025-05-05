@@ -29,10 +29,10 @@ export const useCreateDashboardMutation = (options?: {
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction()
 
   const createDashboard = (serviceName: string) => {
-    if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
-        notification.error(null, 'Contract Package ID is not defined in config')
+      if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
+          notification.error(null, 'Contract Package ID is not defined in config')
         return; 
-    }
+      }
     
     let notificationId: string | undefined;
     try {
@@ -45,16 +45,16 @@ export const useCreateDashboardMutation = (options?: {
         },
         {
           onSuccess: (result: SuiSignAndExecuteTransactionOutput) => {
-            notification.txSuccess(
+      notification.txSuccess(
               transactionUrl(explorerUrl, result.digest),
-              notificationId
-            )
+        notificationId
+      )
             options?.onSuccess?.(result)
-          },
+    },
           onError: (error: Error) => {
             console.error('Transaction failed', error)
             notification.txError(error, null, notificationId)
-          },
+    },
         }
       )
     } catch (e) {
@@ -81,10 +81,10 @@ export const useRegisterGameMutation = (options?: {
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction()
 
   const registerGame = (dashboardObjectId: string, gameId: string) => {
-    if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
-      notification.error(null, 'Contract Package ID is not defined in config')
+      if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
+        notification.error(null, 'Contract Package ID is not defined in config')
       return;
-    }
+      }
     let notificationId: string | undefined;
     try {
       notificationId = notification.txLoading()
@@ -95,16 +95,16 @@ export const useRegisterGameMutation = (options?: {
         },
         {
           onSuccess: (result: SuiSignAndExecuteTransactionOutput) => {
-            notification.txSuccess(
+      notification.txSuccess(
               transactionUrl(explorerUrl, result.digest),
-              notificationId
-            )
+        notificationId
+      )
             options?.onSuccess?.(result)
-          },
+    },
           onError: (error: Error) => {
             console.error('Transaction failed', error)
             notification.txError(error, null, notificationId)
-          },
+    },
         }
       )
     } catch (e) {
@@ -131,10 +131,10 @@ export const useUnregisterGameMutation = (options?: {
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction()
 
   const unregisterGame = (dashboardObjectId: string, gameId: string) => {
-    if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
-      notification.error(null, 'Contract Package ID is not defined in config')
+      if (packageId === CONTRACT_PACKAGE_ID_NOT_DEFINED) {
+        notification.error(null, 'Contract Package ID is not defined in config')
       return;
-    }
+      }
     let notificationId: string | undefined;
     try {
       notificationId = notification.txLoading()
@@ -145,16 +145,16 @@ export const useUnregisterGameMutation = (options?: {
         },
         {
           onSuccess: (result: SuiSignAndExecuteTransactionOutput) => {
-            notification.txSuccess(
+      notification.txSuccess(
               transactionUrl(explorerUrl, result.digest),
-              notificationId
-            )
+        notificationId
+      )
             options?.onSuccess?.(result)
-          },
+    },
           onError: (error: Error) => {
             console.error('Transaction failed', error)
             notification.txError(error, null, notificationId)
-          },
+    },
         }
       )
     } catch (e) {

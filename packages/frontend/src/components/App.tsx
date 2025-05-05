@@ -18,7 +18,9 @@ import useNetworkConfig from '~~/hooks/useNetworkConfig' // 保留这个 Hook
 import ThemeProvider from '~~/providers/ThemeProvider'
 import '~~/styles/index.css'
 import { ENetwork } from '~~/types/ENetwork'
-import { DappRouterProvider } from '~~/dapp/routes' // 假设这是你的路由 Provider
+// import { DappRouterProvider } from '~~/dapp/routes' // Incorrect: This export no longer exists
+import { router } from '~~/dapp/routes/index' // Correct: Import the router instance
+import { RouterProvider } from 'react-router-dom' // Correct: Import the provider component
 
 const themeSettings = getThemeSettings()
 const queryClient = new QueryClient() // 创建 QueryClient 实例
@@ -55,7 +57,9 @@ const App: FC = () => {
               preferredWallets={[APP_NAME]} // 使用正确的属性名
             >
               {/* 假设 DappRouterProvider 包含 BrowserRouter 和页面内容 */}
-              <DappRouterProvider /> 
+              {/* <DappRouterProvider /> */}
+              {/* Use the RouterProvider with the imported router instance */}
+              <RouterProvider router={router} />
             </WalletProvider>
           </SuiClientProvider>
         </QueryClientProvider>

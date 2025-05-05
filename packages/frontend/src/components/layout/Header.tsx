@@ -1,46 +1,55 @@
-import React, { FC, useMemo } from 'react'
-import { ConnectButton } from '@mysten/dapp-kit'
-import { Link } from '@radix-ui/themes'
-import { Coffee } from 'lucide-react'
-import BalanceBadge from '../ui/BalanceBadge'
-import {
-  useCurrentAccount,
-  useSuiClientContext,
-  useSuiClientQuery,
-} from '@mysten/dapp-kit'
+import { FC } from 'react';
+import { Link } from 'react-router-dom';
+import { ConnectButton, useCurrentAccount } from '@mysten/dapp-kit';
+import { Box, Flex, Heading, Text } from '@radix-ui/themes';
 
 const Header: FC = () => {
-  const currentAccount = useCurrentAccount()
-  const ctx = useSuiClientContext()
-  const networkName = ctx.network
+  const currentAccount = useCurrentAccount();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Coffee className="h-6 w-6" />
-          <span className="font-bold">
-            {import.meta.env.VITE_APP_NAME || 'Sui DApp'}
-          </span>
-        </Link>
+    <header className="sticky top-0 z-10 w-full border-b border-border bg-background/80 backdrop-blur-sm">
+      <Box className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <Flex justify="between" align="center" className="h-16">
+          {/* Logo/Site Title */}
+          <Link to="/" className="flex items-center space-x-2">
+            {/* Replace with actual logo later */}
+            <Heading as="h1" size="5" className="font-semibold text-foreground">
+              CafeGame
+            </Heading>
+      </Link>
 
-        <nav className="flex items-center space-x-6 text-sm font-medium mr-6">
-          {/* <a href="#">Games</a> */}
-          {/* <a href="#">Reviews</a> */}
+          {/* Navigation Links & Connect Button */}
+          <Flex align="center" gap="6">
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link to="/">
+                <Text size="3" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Discover
+                </Text>
+              </Link>
+              {/* Add Games link later if needed */}
+              {/* <Link to="/games">
+                <Text size="3" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Games
+                </Text>
+              </Link> */}
+              {currentAccount && (
+                <Link to="/profile"> {/* Assuming a /profile route exists or will be added */}
+                  <Text size="3" className="text-muted-foreground hover:text-foreground transition-colors">
+                    My Profile
+                  </Text>
+                </Link>
+              )}
         </nav>
 
-        <div className="ml-auto flex flex-shrink-0 items-center space-x-4">
-          {networkName && (
-            <div className="rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-              {networkName.toUpperCase()}
-            </div>
-          )}
-          <BalanceBadge className="text-sm" />
-          <ConnectButton />
+            {/* Wallet Connect Button - Apply custom styling container if needed, or style directly */}
+            <div className="sds-connect-button-container"> {/* Keep existing class for potential targeted styles */}
+                 <ConnectButton connectText="Connect Wallet" />
         </div>
-      </div>
+          </Flex>
+        </Flex>
+      </Box>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

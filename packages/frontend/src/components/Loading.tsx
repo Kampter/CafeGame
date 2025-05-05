@@ -1,12 +1,23 @@
-import { Spinner } from '@radix-ui/themes'
 import { FC } from 'react'
+import { Flex, Spinner, Text } from '@radix-ui/themes'
+// Import the extracted type
+import type { LoadingProps } from '~~/types/components.types';
 
-const Loading: FC = () => {
+// Remove original LoadingProps definition
+// interface LoadingProps {
+//   // Removed message prop as it caused issues earlier
+//   // You can add it back if needed, ensuring the calling components provide it
+//   // message?: string;
+// }
+
+// Use the imported LoadingProps type
+const Loading: FC<LoadingProps> = (/*{ message }*/) => {
   return (
-    <div className="flex flex-row items-center justify-center gap-2">
+    <Flex direction="column" align="center" justify="center" gap="3" style={{ padding: 'var(--space-5)' }}>
       <Spinner size="3" />
-      Loading...
-    </div>
+      {/* {message && <Text color="gray">{message}</Text>} */}
+      <Text color="gray">Loading...</Text>
+    </Flex>
   )
 }
 

@@ -6,6 +6,7 @@ import {
 import { FC, ReactNode, useMemo } from 'react'
 import { isNetworkSupported, supportedNetworks } from '~~/helpers/network'
 import { ENetwork } from '~~/types/ENetwork'
+import type { NetworkSupportCheckerProps } from '~~/types/components.types';
 
 const getNetworkNameFromChain = (chain: string | undefined): string | undefined => {
   if (!chain) return undefined
@@ -19,10 +20,6 @@ const stringToENetwork = (name: string | undefined): ENetwork | undefined => {
   return Object.values(ENetwork).includes(lowerCaseName as ENetwork)
     ? (lowerCaseName as ENetwork)
     : undefined;
-}
-
-interface NetworkSupportCheckerProps {
-  children: ReactNode
 }
 
 const NetworkSupportChecker: FC<NetworkSupportCheckerProps> = ({ children }) => {
@@ -45,7 +42,7 @@ const NetworkSupportChecker: FC<NetworkSupportCheckerProps> = ({ children }) => 
 
   return (
     <>
-      <div className="mx-auto w-full max-w-lg px-3 py-2">
+    <div className="mx-auto w-full max-w-lg px-3 py-2">
         <div className="w-full rounded border border-red-400 bg-red-50 px-3 py-2 text-center text-red-600">
           {walletNetworkName ? (
             <>
@@ -56,8 +53,8 @@ const NetworkSupportChecker: FC<NetworkSupportCheckerProps> = ({ children }) => 
               Could not detect the network from the connected wallet.
             </>
           )}
-          <br />
-          Please switch to a supported network [
+        <br />
+        Please switch to a supported network [
           <span className="font-bold">{okNetworks.join(', ')}</span>] in your wallet settings.
         </div>
       </div>

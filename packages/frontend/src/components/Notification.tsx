@@ -3,11 +3,8 @@ import c from 'clsx'
 import { XIcon } from 'lucide-react'
 import { FC, PropsWithChildren } from 'react'
 import toast, { ToastType } from 'react-hot-toast'
+import type { INotification } from '~~/types/components.types'
 
-interface INotification {
-  id?: string
-  type: ToastType
-}
 const Notification: FC<PropsWithChildren<INotification>> = ({
   children,
   id,

@@ -69,25 +69,25 @@ const GreetingForm: FC = () => {
                 options: WAIT_FOR_TX_OPTIONS,
               })
               .then((txRes: SuiTransactionBlockResponse) => {
-                notification.txSuccess(
+      notification.txSuccess(
                   transactionUrl(explorerUrl, result.digest),
-                  notificationId
-                )
-                refetch()
+        notificationId
+      )
+      refetch()
               })
               .catch((err: Error) => {
                 console.error('Error waiting for transaction', err)
                 notification.txError(
                   err,
                   'Error waiting for transaction confirmation',
-                  notificationId
-                )
+        notificationId
+      )
               })
-          },
+    },
           onError: (error) => {
             console.error('Create Greeting failed', error)
             notification.txError(error, null, notificationId)
-          },
+    },
         }
       )
     } catch (err) {

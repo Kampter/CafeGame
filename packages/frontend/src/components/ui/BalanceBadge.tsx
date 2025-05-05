@@ -6,12 +6,15 @@ import {
 // import { MIST_PER_SUI } from '@mysten/sui/client' // 移除旧的导入
 import { MIST_PER_SUI } from '@mysten/sui/utils' // 从 /utils 导入
 import { Badge } from '@radix-ui/themes' // 使用 Radix UI Badge
+// Import the extracted type
+import type { BalanceBadgeProps } from '~~/types/components.types';
 
-interface BalanceBadgeProps {
-  // 可以添加其他 props，例如 className
-  className?: string;
-}
+// Remove original BalanceBadgeProps definition
+// interface BalanceBadgeProps {
+//   className?: string;
+// }
 
+// Use the imported BalanceBadgeProps type
 const BalanceBadge: FC<BalanceBadgeProps> = ({ className }) => {
   const currentAccount = useCurrentAccount()
 

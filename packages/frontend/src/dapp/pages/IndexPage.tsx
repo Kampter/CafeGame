@@ -1,29 +1,101 @@
 import { FC } from 'react'
-// import GreetingForm from '~~/dapp/components/GreetingForm' // Commented out
-import { Flex, Separator, Heading } from '@radix-ui/themes'; // Import necessary layout components
-import Layout from '~~/components/layout/Layout'
+import { Flex, Heading, Text, Button, Grid, Box } from '@radix-ui/themes';
+// import Layout from '~~/components/layout/Layout' // Remove Layout component
 import NetworkSupportChecker from '../../components/NetworkSupportChecker'
-import DashboardFeature from '~~/dapp/components/DashboardFeature' // <-- 添加这个导入
-import CreateGameForm from '~~/dapp/components/game/CreateGameForm'; // Import the new form
+// import DashboardFeature from '~~/dapp/components/DashboardFeature' // Let's remove this for now
+import { Link } from 'react-router-dom';
+// Import the new leaderboard components
+import { HotGamesLeaderboard } from '../components/dashboard/HotGamesLeaderboard';
+import { TopRatedGamesLeaderboard } from '../components/dashboard/TopRatedGamesLeaderboard';
+// Import the data fetching hook
+import { useFetchDashboardGames } from '../hooks/useFetchDashboardGames'; 
+// Import the type from its correct location
+import type { DashboardGameData } from '~~/dapp/types/dashboard.types'; 
+import { GameCard } from '../components/game/GameCard';
 
+// --- Recommended Games Section --- 
+const RecommendedGamesSection: FC = () => {
+     const { games, isLoading, error } = useFetchDashboardGames();
+     const recommended = games.slice(0, 3);
+
+     return (
+        // Use Tailwind classes for spacing
+        <section aria-labelledby="recommended-games-heading" className="space-y-4">
+            <Heading id="recommended-games-heading" as="h2" size="5" className="font-semibold text-foreground">Recommended For You</Heading>
+            {isLoading && <Text className="text-muted-foreground">Loading recommendations...</Text>}
+            {/* TODO: Define error color in theme */}
+            {error && <Text className="text-red-600">Error loading games: {error}</Text>}
+            {!isLoading && !error && (
+                 recommended.length > 0 ? (
+                    // Adjust grid gap
+                     <Grid columns={{ initial: '1', sm: '2', md: '3' }} gap="6">
+                         {recommended.map((game: DashboardGameData) => (
+                            <GameCard 
+                                key={game.gameId}
+                                gameId={game.gameId}
+                                name={game.name}
+                                genre={game.genre || 'N/A'} 
+                                platform={game.platform || 'N/A'}
+                                overallRate={game.overallRate}
+                                // imageUrl={game.imageUrl}
+                            />
+                        ))}
+                    </Grid>
+                 ) : (
+                     <Text className="text-muted-foreground">No recommended games found.</Text>
+                 )
+            )}
+        </section>
+    );
+};
+
+// --- Main Index Page Component ---
 const IndexPage: FC = () => {
   return (
-    <Layout>
-      <NetworkSupportChecker />
-      {/* Use Flex for better layout control */}
-      <Flex direction="column" align="center" gap="6" className="flex-grow p-3">
-        {/* <GreetingForm /> // Commented out */}
+    // Remove Layout wrapper
+    <>
+      <NetworkSupportChecker><></></NetworkSupportChecker> 
+      {/* Adjust main container padding and remove max-width */}
+      <Flex direction="column" align="stretch" gap="10" className="flex-grow"> 
+        
+        {/* Keep existing DashboardFeature if it holds general dashboard elements like user stats? */}
+        {/* Review if DashboardFeature needs removal or modification */}
+        {/* <DashboardFeature /> */} 
 
-        {/* Render existing Dashboard feature */}
-        <DashboardFeature />
+        <Flex justify="between" align="center">
+             {/* Update Heading */}
+             <Heading as="h1" size="7" weight="bold" className="text-foreground">Discover Games</Heading>
+             {/* Style Button according to Wabi-Sabi */}
+             <Button 
+               variant="outline" // Use outline style
+               color="gray" // Use neutral color for border/text
+               highContrast // Ensure text visibility
+               size="3" 
+               className="border-accent text-accent hover:bg-accent/10 hover:text-accent transition-colors" // Apply accent colors on hover/border
+               asChild
+             >
+                 <Link to="/create-game">
+                     List New Game
+                 </Link>
+             </Button>
+        </Flex>
 
-        {/* Add separator and the new Game creation form for testing */}
-        <Separator my="6" size="4" className="w-full max-w-xl"/>
-        <Heading mb="4" color="gray">Debug: Create New Game</Heading>
-        <CreateGameForm />
+        {/* Recommended Games Section */}
+        <RecommendedGamesSection />
+
+        {/* Leaderboards Section - Adjust gap */}
+        <Flex gap="8" direction={{ initial: 'column', md: 'row' }} justify="between">
+            <Box flexGrow="1" style={{ minWidth: 0 }}> 
+                 <HotGamesLeaderboard />
+            </Box>
+            <Box flexGrow="1" style={{ minWidth: 0 }}> 
+                 <TopRatedGamesLeaderboard />
+            </Box>
+        </Flex>
+
       </Flex>
-    </Layout>
-  )
+    </>
+  );
 }
 
 export default IndexPage

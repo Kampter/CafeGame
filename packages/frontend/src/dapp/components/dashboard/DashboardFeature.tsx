@@ -1,14 +1,12 @@
 import { FC } from 'react'
 import { useCurrentAccount } from '@mysten/dapp-kit'
-// import useOwnDashboards from '~~/dapp/hooks/useOwnDashboards' // No longer fetching owned dashboards
-import CreateDashboardForm from '~~/dapp/components/CreateDashboardForm'
-import DashboardManager from '~~/dapp/components/DashboardManager'
-import Loading from '~~/components/Loading' // Still needed if components inside have loading states
+// Adjust import paths for moved components
+import CreateDashboardForm from './CreateDashboardForm'
+import DashboardManager from './DashboardManager'
+import Loading from '~~/components/Loading' 
 import CustomConnectButton from '~~/components/CustomConnectButton'
-import { Flex, Heading, Text, Separator } from '@radix-ui/themes' // Added Separator
-
-// Hardcoded Dashboard Object ID
-const HARDCODED_DASHBOARD_ID = '0x1bfc7b04b6accc3b32d380d2202211571a70bb8efb8ee728d59bd5dcc76b648d';
+import { Flex, Heading, Text, Separator } from '@radix-ui/themes'
+import { HARDCODED_DASHBOARD_ID } from '~~/dapp/config/network';
 
 // Removed getResponseObjectId helper as it's no longer needed here
 

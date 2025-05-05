@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* Remove CSS variable definitions, rely on Tailwind config */
+/* :root {
   --sds-light: #ffffffde;
   --sds-dark: #011631;
   --sds-pink: #fed5f4;
@@ -16,18 +17,36 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
+} */
 
-body, #root {
-  display: flex;
+@layer base {
+  body {
+    /* Apply base colors and font from Tailwind */
+    @apply bg-background text-foreground;
+    min-height: 100vh;
+    /* Remove flex centering, allow content to flow normally */
+    /* display: flex;
+    flex-direction: column;
+    justify-content:center;
+    align-items:center; */
+    /* Ensure text rendering optimizations are still applied */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Set default font family using Tailwind's theme */
+    font-family: theme('fontFamily.sans');
+  }
+
+  #root {
+    /* Allow root to take full width and necessary height */
+    width: 100%;
+    display: flex; /* Keep flex for layout structure like header/main/footer */
   flex-direction: column;
-  justify-content:center;
-  align-items:center;
-  min-width: 100%;
   min-height: 100vh;
+  }
 }
 
-/* Custom styles where it's not possible to use Tailwind classes. */
+/* Keep custom styles for connect button for now, review later */
 .sds-connect-button-container {
   button {
     padding: 8px 16px !important;

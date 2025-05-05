@@ -56,42 +56,20 @@ const Footer: FC = () => {
       <div className="flex flex-row gap-3 lg:w-1/3">
         <CustomFaucetButton />
         {explorerUrl && packageId && packageId !== '0x0' && (
-          <Link
-            href={packageUrl(explorerUrl, packageId)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-row items-center gap-1"
-            highContrast={true}
-          >
-            <SearchIcon className="h-4 w-4" />
-            <span>Block Explorer</span>
-          </Link>
+            <Link
+              href={packageUrl(explorerUrl, packageId)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-row items-center gap-1"
+              highContrast={true}
+            >
+              <SearchIcon className="h-4 w-4" />
+              <span>Block Explorer</span>
+            </Link>
         )}
       </div>
 
       <div className="flex flex-grow flex-col items-center justify-center gap-1">
-        <div className="flex flex-row items-center justify-center gap-1">
-          <span>Built with</span>
-          <HeartIcon className="h-4 w-4" />
-          <span>by</span>
-          <Link
-            href="https://github.com/suiware"
-            target="_blank"
-            rel="noopener noreferrer"
-            highContrast={true}
-          >
-            @suiware
-          </Link>
-          <span>·</span>
-          <Link
-            href="https://github.com/suiware/sui-dapp-starter/issues/new"
-            target="_blank"
-            rel="noopener noreferrer"
-            highContrast={true}
-          >
-            Support
-          </Link>
-        </div>
         <div className="text-center text-sm opacity-70">
           SVG graphics, used in NFTs, have been borrowed from{' '}
           <Link

@@ -1,10 +1,7 @@
 import { Button, TextField } from '@radix-ui/themes'
 import { ChangeEvent, FC, FormEvent, useState } from 'react'
 import { useCreateDashboardMutation } from '~~/dapp/hooks/useDashboardMutations'
-
-interface CreateDashboardFormProps {
-  onSuccess?: () => void 
-}
+import type { CreateDashboardFormProps } from '~~/dapp/types/dashboard.types';
 
 const CreateDashboardForm: FC<CreateDashboardFormProps> = ({ onSuccess }) => {
   const [serviceName, setServiceName] = useState<string>('')

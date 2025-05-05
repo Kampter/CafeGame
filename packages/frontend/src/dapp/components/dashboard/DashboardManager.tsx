@@ -5,13 +5,10 @@ import {
   useRegisterGameMutation,
   useUnregisterGameMutation,
 } from '~~/dapp/hooks/useDashboardMutations'
-import { TrashIcon } from 'lucide-react'
+import { TrashIcon } from 'lucide-react' 
 import { Link as RouterLink } from 'react-router-dom'
 import Loading from '~~/components/Loading'
-
-interface DashboardManagerProps {
-  dashboardId: string;
-}
+import type { DashboardManagerProps } from '~~/dapp/types/dashboard.types';
 
 const DashboardManager: FC<DashboardManagerProps> = ({
   dashboardId,
