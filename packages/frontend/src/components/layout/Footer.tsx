@@ -6,7 +6,7 @@ import {
 import { Link } from '@radix-ui/themes'
 import { Button } from '../ui/Button'
 import { HeartIcon, SearchIcon, DropletIcon } from 'lucide-react'
-import ThemeSwitcher from '~~/components/ThemeSwitcher'
+// import ThemeSwitcher from '~~/components/ThemeSwitcher' // Removed
 import {
   CONTRACT_PACKAGE_VARIABLE_NAME,
   EXPLORER_URL_VARIABLE_NAME,
@@ -52,7 +52,7 @@ const Footer: FC = () => {
   const currentAccount = useCurrentAccount()
 
   return (
-    <footer className="flex w-full flex-col items-center justify-between gap-3 p-3 sm:flex-row sm:items-end">
+    <footer className="flex w-full flex-col items-center justify-between gap-3 p-3 sm:flex-row sm:items-end border-t border-realm-border bg-realm-surface-secondary">
       <div className="flex flex-row gap-3 lg:w-1/3">
         <CustomFaucetButton />
         {explorerUrl && packageId && packageId !== '0x0' && (
@@ -60,8 +60,7 @@ const Footer: FC = () => {
               href={packageUrl(explorerUrl, packageId)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-row items-center gap-1"
-              highContrast={true}
+              className="flex flex-row items-center gap-1 text-realm-text-secondary hover:text-realm-text-primary transition-colors"
             >
               <SearchIcon className="h-4 w-4" />
               <span>Block Explorer</span>
@@ -76,7 +75,7 @@ const Footer: FC = () => {
             href="https://github.com/twitter/twemoji"
             target="_blank"
             rel="noopener noreferrer"
-            highContrast={true}
+            className="text-realm-text-secondary hover:text-realm-text-primary transition-colors"
           >
             twitter/twemoji
           </Link>
@@ -86,7 +85,7 @@ const Footer: FC = () => {
             href="https://creativecommons.org/licenses/by/4.0/"
             target="_blank"
             rel="noopener noreferrer"
-            highContrast={true}
+            className="text-realm-text-secondary hover:text-realm-text-primary transition-colors"
           >
             CC-BY 4.0
           </Link>
@@ -94,7 +93,7 @@ const Footer: FC = () => {
       </div>
 
       <div className="flex flex-row justify-end lg:w-1/3">
-        <ThemeSwitcher />
+        {/* <ThemeSwitcher /> // Removed */}
       </div>
     </footer>
   )

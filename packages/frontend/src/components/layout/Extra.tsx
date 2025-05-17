@@ -7,12 +7,13 @@ const Extra = () => {
       <AnimatedBackground />
       <Toaster
         toastOptions={{
-          className:
-            'dark:!bg-sds-dark !bg-sds-light !text-sds-dark dark:!text-sds-light w-full md:!max-w-xl !shadow-toast',
+          className: 'bg-realm-surface-secondary text-realm-text-primary border border-realm-border rounded-lg shadow-realm-glow-primary-sm w-full md:max-w-md p-4',
           style: {
-            maxWidth: 'none',
+            // maxWidth: 'none',
           },
+          duration: 4000,
         }}
+        position="bottom-right"
       />
     </>
   )

@@ -11,11 +11,14 @@ import {
 } from '@mysten/dapp-kit'
 // import { getFullnodeUrl } from '@mysten/sui/client' // 不再需要，由 useNetworkConfig 处理
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { TooltipProvider } from '@radix-ui/react-tooltip'
+import { Theme as RadixTheme } from '@radix-ui/themes'
 import { FC, StrictMode } from 'react'
 import { APP_NAME } from '~~/config/main'
 import { getThemeSettings } from '~~/helpers/theme'
 import useNetworkConfig from '~~/hooks/useNetworkConfig' // 保留这个 Hook
-import ThemeProvider from '~~/providers/ThemeProvider'
+// import ThemeProvider from '~~/providers/ThemeProvider' // <-- Remove or comment out default import
+import { ThemeProvider as CustomThemeProvider } from '~~/providers/ThemeProvider' // <-- Add named import and alias
 import '~~/styles/index.css'
 import { ENetwork } from '~~/types/ENetwork'
 // import { DappRouterProvider } from '~~/dapp/routes' // Incorrect: This export no longer exists
@@ -48,22 +51,25 @@ const App: FC = () => {
   // 新实现，使用官方 Provider
   return (
     <StrictMode>
-      <ThemeProvider> { /* 保留你的 ThemeProvider */ }
+      {/* CustomThemeProvider for forcing dark mode via class on html tag */}
+      <CustomThemeProvider> 
+        {/* TooltipProvider from @radix-ui/react-tooltip, should be high up */}
+        <TooltipProvider>
+          {/* Radix UI Theme Provider from @radix-ui/themes */}
+          <RadixTheme appearance="dark" accentColor="cyan" grayColor="mauve" panelBackground="solid" radius="medium">
         <QueryClientProvider client={queryClient}>
           <SuiClientProvider networks={networkConfig} defaultNetwork={ENetwork.TESTNET}>
             <WalletProvider 
-              autoConnect={false} // 保持原配置
-              // theme={themeSettings} // WalletProvider 的 theme 可能与你的 ThemeProvider 冲突或冗余，先注释掉
-              preferredWallets={[APP_NAME]} // 使用正确的属性名
+                  autoConnect={false} 
+                  preferredWallets={[APP_NAME]} 
             >
-              {/* 假设 DappRouterProvider 包含 BrowserRouter 和页面内容 */}
-              {/* <DappRouterProvider /> */}
-              {/* Use the RouterProvider with the imported router instance */}
               <RouterProvider router={router} />
             </WalletProvider>
           </SuiClientProvider>
         </QueryClientProvider>
-      </ThemeProvider>
+          </RadixTheme>
+        </TooltipProvider>
+      </CustomThemeProvider>
     </StrictMode>
   )
 }

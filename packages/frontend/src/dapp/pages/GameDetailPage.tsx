@@ -1,33 +1,76 @@
 import { FC, useState, useEffect } from 'react';
-import { useParams, Link as RouterLink } from 'react-router-dom';
+import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import useGame, { getGameFields } from '~~/dapp/hooks/useGame';
-// import Layout from '~~/components/layout/Layout'; // Remove Layout
 import Loading from '~~/components/Loading';
-import { Card, Text, Heading, Flex, Box, Separator, Button, Tabs } from '@radix-ui/themes'; // Keep Radix components
-import { ArrowLeftIcon } from '@radix-ui/react-icons';
+import { Card, Text, Heading, Flex, Box, Separator, Button, Tabs } from '@radix-ui/themes'; // Removed Tooltip here as it was for debugging
+import { ChevronLeft, Star, Download } from 'lucide-react';
 import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
 import useNetworkConfig from '~~/hooks/useNetworkConfig';
 import { CONTRACT_PACKAGE_VARIABLE_NAME } from '~~/config/network';
 import { useFetchReviews } from '~~/dapp/hooks/useFetchReviews';
 import ReviewCard from '~~/dapp/components/review/ReviewCard';
-import CreateReviewForm from '~~/dapp/components/review/CreateReviewForm';
+import { CreateReviewForm } from '../components/review/CreateReviewForm';
 import { useFetchGuides } from '~~/dapp/hooks/useFetchGuides';
 import GuideCard from '~~/dapp/components/guide/GuideCard';
-import CreateGuideForm from '~~/dapp/components/guide/CreateGuideForm';
+import { CreateGuideForm } from '../components/guide/CreateGuideForm';
 import UploadGameFile from '~~/dapp/components/game/UploadGameFile';
 import PurchaseDownloadButton from '~~/dapp/components/game/PurchaseDownloadButton';
+import { useToast } from '~~/components/ui/use-toast';
+// import { useGameContract } from '~~/hooks/useGameContract'; // Commented out
+import type { IGame } from '~~/types/game.types';
+import { useQuery } from '@tanstack/react-query';
+// import { useAccount } from 'wagmi'; // Commented out wagmi import
+// import { usePurchase as useWagmiPurchase } from '../hooks/usePurchase'; // Commented out wagmi import
+// import { useDownload as useWagmiDownload } from '../hooks/useDownload'; // Commented out wagmi import
+import { CardContent, CardHeader } from '~~/components/ui/Card';
+import { Input } from '~~/components/ui/Input';
+import { Textarea } from '~~/components/ui/Textarea';
+import { useReviews } from '../hooks/useReviews';
+import { useGuides } from '../hooks/useGuides';
 
-const GameDetailPage: FC = () => {
+interface Game {
+  id: string;
+  title: string;
+  description: string;
+  price: string;
+  imageUrl: string;
+  creator: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Review {
+  id: string;
+  content: string;
+  rating: number;
+  author: string;
+  createdAt: Date;
+}
+
+interface Guide {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const GameDetailPage: FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const { data: gameData, isLoading: isLoadingGame, error: gameError, refetch: refetchGame } = useGame(gameId);
   const currentAccount = useCurrentAccount(); 
   const suiClient = useSuiClient();
   const networkConfig = useNetworkConfig();
   const gamePackageId = networkConfig.useNetworkVariable(CONTRACT_PACKAGE_VARIABLE_NAME);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  // const { contract } = useGameContract(); // Commented out
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminCapId, setAdminCapId] = useState<string | null>(null);
   const [isAdminCheckLoading, setIsAdminCheckLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'reviews' | 'guides'>('reviews');
 
   const gameFields = getGameFields(gameData);
   // console.log("[GameDetailPage] gameFields:", gameFields); 
@@ -111,16 +154,16 @@ const GameDetailPage: FC = () => {
   }, [currentAccount?.address, gameId, gamePackageId, suiClient]); // Dependencies for the check
 
   // Success handlers (keep as is)
-  const handleReviewSuccess = () => {
+  const handleReviewSuccess = async (): Promise<void> => {
       console.log('Review created successfully, refetching reviews and game data...');
-      refetchReviews();
-      refetchGame();
+      await refetchReviews();
+      await refetchGame();
       setIsCreatingReview(false);
   };
-  const handleGuideSuccess = () => {
+  const handleGuideSuccess = async (): Promise<void> => {
       console.log('Guide created successfully, refetching guides and game data...');
-      refetchGuides();
-      refetchGame();
+      await refetchGuides();
+      await refetchGame();
       setIsCreatingGuide(false);
   };
 
@@ -132,8 +175,8 @@ const GameDetailPage: FC = () => {
   // Renders the list of reviews or loading/error state
   const renderReviewListContent = () => {
       if (isLoadingReviews) return <Loading />;
-      if (reviewsError) return <Text className="text-red-600">Error loading reviews: {reviewsError}</Text>;
-      if (reviews.length === 0 && !isCreatingReview) return <Text className="text-muted-foreground">No reviews yet. Be the first!</Text>;
+      if (reviewsError) return <Text className="text-destructive">Error loading reviews: {reviewsError}</Text>;
+      if (reviews.length === 0 && !isCreatingReview) return <Text className="text-realm-text-secondary">No reviews yet. Be the first!</Text>;
       if (reviews.length > 0) {
       return (
                  <Flex direction="column" gap="3"> {/* Style the review list container */}
@@ -149,14 +192,12 @@ const GameDetailPage: FC = () => {
   // Renders the list of guides or loading/error state
   const renderGuideListContent = () => {
       if (isLoadingGuides) return <Loading />;
-      if (guidesError) return <Text className="text-red-600">Error loading guides: {guidesError}</Text>;
-      // console.log('[GameDetailPage] Guides array for rendering:', guides);
-      if (guides.length === 0 && !isCreatingGuide) return <Text className="text-muted-foreground">No guides available yet. Share your knowledge!</Text>;
+      if (guidesError) return <Text className="text-destructive">Error loading guides: {guidesError}</Text>;
+      if (guides.length === 0 && !isCreatingGuide) return <Text className="text-realm-text-secondary">No guides available yet. Share your knowledge!</Text>;
       if (guides.length > 0) {
       return (
                  <Flex direction="column" gap="3"> {/* Style the guide list container */}
                    {guides.map((guide) => {
-                        // console.log('[GameDetailPage] Rendering GuideCard for:', guide);
                         return <GuideCard key={guide.guideId} guide={guide} />;
                     })}
                  </Flex>
@@ -165,166 +206,201 @@ const GameDetailPage: FC = () => {
       return null; // Render nothing if loading form and no guides yet
   };
 
+  const handlePurchase = async () => {
+    console.warn("handlePurchase logic is temporarily commented out.");
+    toast({ title: 'Purchase Temporarily Disabled', description: 'Contract interaction needs review.', type: 'info' });
+    // if (!contract || !gameId) return;
+    // try {
+    //   const tx = await contract.purchaseGame(parseInt(gameId), {
+    //     value: gameFields?.price,
+    //   });
+    //   await tx.wait();
+    //   toast({
+    //     title: '购买成功',
+    //     description: '游戏已添加到您的库中',
+    //   });
+    // } catch (error) {
+    //   toast({
+    //     title: '购买失败',
+    //     description: error instanceof Error ? error.message : '未知错误',
+    //     type: 'error',
+    //   });
+    // }
+  };
+
+  const handleDownload = async () => {
+    console.warn("handleDownload logic is temporarily commented out.");
+    toast({ title: 'Download Temporarily Disabled', description: 'Contract interaction needs review.', type: 'info' });
+    // if (!contract || !gameId) return;
+    // try {
+    //   const tx = await contract.downloadGame(parseInt(gameId));
+    //   await tx.wait();
+    //   toast({
+    //     title: '下载成功',
+    //     description: '游戏文件已准备就绪',
+    //   });
+    // } catch (error) {
+    //   toast({
+    //     title: '下载失败',
+    //     description: error instanceof Error ? error.message : '未知错误',
+    //     type: 'error',
+    //   });
+    // }
+  };
+
   // --- Loading / Error / Not Found States --- 
-  if (isLoadingGame || isAdminCheckLoading) return <Loading />;
-  if (gameError) return <Text className="text-red-600 p-6">Error loading game: {gameError.message}</Text>; // Add padding
-  if (!gameFields) return <Text className="text-muted-foreground p-6">Game not found.</Text>; // Add padding
+  if (isLoadingGame || isAdminCheckLoading) {
+    return <Loading />;
+  }
+
+  if (gameError || !gameFields) {
+    return <Text className="text-destructive">Error loading game details or game not found.</Text>;
+  }
+
+  const displayImageUrl = gameFields.imageUrl || `https://source.unsplash.com/random/800x600/?game,${encodeURIComponent(gameFields.name || 'concept')}`;
 
   // --- Main Content --- 
   return (
-    // Removed Layout wrapper
-    <Flex direction="column" gap="8" className="flex-grow w-full"> {/* Use full width, gap for sections */} 
+    <Box className="space-y-6">
+      {/* Back Button */}
+      <RouterLink to="/" className="inline-flex items-center gap-1 text-realm-text-secondary hover:text-realm-neon-primary transition-colors">
+        <ChevronLeft size={20} />
+        <Text size="2">Back to Discover</Text>
+      </RouterLink>
 
-      {/* Back Button - Positioned at top */}
-      <Box className="mb-0"> {/* Reduce bottom margin */}
-          <RouterLink to={'/'} className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeftIcon />
-              <Text size="2">Back</Text> {/* English text */} 
-          </RouterLink>
-      </Box>
-
-      {/* --- Game Header Section --- */}
-      <Flex direction={{ initial: 'column', md: 'row' }} gap="8">
-        {/* Left Column: Image/Video Placeholder */}
+      {/* Top Game Info Section */}
+      <Flex direction={{ initial: 'column', md: 'row' }} gap="6">
+        {/* Left: Image */}
         <Box className="w-full md:w-1/3 lg:w-2/5 flex-shrink-0">
-          <Box className="aspect-video bg-muted rounded-lg shadow-sm flex items-center justify-center"> 
-            {/* TODO: Replace with actual game image/video carousel */}
-            <Text className="text-muted-foreground">Game Media Placeholder</Text>
-          </Box>
+          <div className="aspect-video bg-realm-surface-secondary rounded-lg overflow-hidden shadow-lg">
+            <img 
+              src={displayImageUrl} 
+              alt={`${gameFields.name} cover`} 
+              className="w-full h-full object-cover"
+            />
+          </div>
         </Box>
 
-        {/* Right Column: Details & Actions */}
-        <Flex direction="column" gap="4" className="w-full">
-          <Heading as="h1" size="8" weight="bold" className="text-foreground">{gameFields.name}</Heading>
-          <Flex gap="4" align="center" wrap="wrap"> {/* Wrap tags/info */} 
-            <Text size="3" className="text-muted-foreground">{gameFields.genre}</Text>
-            <Separator orientation="vertical" size="2" />
-            <Text size="3" className="text-muted-foreground">{gameFields.platform}</Text>
-             {/* TODO: Display rating more prominently */}
-             {gameFields.overall_rate && (
-                <>
-                    <Separator orientation="vertical" size="2" />
-                    <Text size="3" className="text-amber-600 font-medium">⭐ {gameFields.overall_rate}</Text>
-                </>
-             )}
+        {/* Right: Details & Actions */}
+        <Flex direction="column" gap="3" className="flex-grow">
+          <Heading as="h1" size="8" weight="bold" className="text-realm-neon-primary">
+            {gameFields.name || 'Untitled Game'}
+          </Heading>
+          <Text size="3" className="text-realm-text-secondary">
+            By: {gameFields.creatorName || 'Unknown Developer'}
+          </Text>
+          
+          <Flex wrap="wrap" gap="2" align="center">
+            {gameFields.genre && (
+              <Text size="2" className="bg-realm-surface-secondary text-realm-text-secondary px-3 py-1 rounded-md">
+                {gameFields.genre}
+              </Text>
+            )}
+             {/* Platform can be added here similarly if available */}
           </Flex>
-          {/* Price and Purchase Button */} 
-          <Flex align="center" justify="between" gap="4" className="mt-4">
-             <Text size="5" weight="medium" className="text-foreground">{gameFields.price ?? 0} MIST</Text>
-             {gameId && currentAccount && (
-                <PurchaseDownloadButton
-                  gameId={gameId}
-                  gameData={gameData} 
-                  refetchGame={refetchGame}
-                  // We might need to pass styling props or wrap this button later 
-                />
-              )}
-          </Flex>
+
+          {typeof gameFields.overallRate === 'number' && gameFields.overallRate > 0 && (
+            <Flex align="center" gap="1.5">
+              <Star size={20} className="text-realm-neon-primary" />
+              <Text size="4" weight="medium" className="text-realm-neon-primary">
+                {gameFields.overallRate.toFixed(1)}
+              </Text>
+              <Text size="2" className="text-realm-text-secondary">
+                ({gameFields.reviewsCount || 0} reviews)
+              </Text>
+            </Flex>
+          )}
+
+          <Text size="5" weight="medium" className="text-realm-text-primary mt-2">
+            Price: {gameFields.price ? `${(Number(gameFields.price) / 1_000_000_000).toFixed(2)} SUI` : 'N/A'}
+          </Text>
+
+          <Box className="mt-auto pt-4"> {/* Push button to bottom of this flex container */}
+            <PurchaseDownloadButton 
+              gameId={gameId!} 
+              gameData={gameData}
+              refetchGame={refetchGame}
+            />
+          </Box>
         </Flex>
       </Flex>
 
-      {/* --- Description Section --- */}
-      <Box className="space-y-2">
-          <Heading as="h2" size="5" className="font-semibold text-foreground">Description</Heading>
-          <Text as="p" className="text-muted-foreground leading-relaxed">{gameFields.description}</Text>
+      <Separator size="4" className="my-6 border-realm-border" />
+
+      {/* Game Description */}
+      <Box>
+        <Heading as="h2" size="6" className="text-realm-neon-secondary mb-3">
+          Description
+        </Heading>
+        <Text as="p" size="3" className="text-realm-text-primary leading-relaxed">
+          {gameFields.description || 'No description available.'}
+        </Text>
       </Box>
 
-      {/* --- Admin Upload Section --- */}
-      {isAdmin && gameId && adminCapId && (
-        <Box className="bg-card rounded-lg shadow-sm p-5 mt-6"> {/* Style container */}
-          <UploadGameFile gameId={gameId} adminCapId={adminCapId} />
-        </Box>
-      )}
+      <Separator size="4" className="my-6 border-realm-border" />
 
-      {/* --- Tabs Section (Reviews & Guides) --- */}
-      {(reviewsTableId || guidesTableId) && ( 
-        <Tabs.Root defaultValue="reviews" className="w-full mt-6">
-            {/* Style Tabs List and Triggers */}
-            <Tabs.List className="border-b border-border mb-4">
-                {reviewsTableId && (
-                    <Tabs.Trigger 
-                      value="reviews" 
-                      className="px-4 py-2 text-muted-foreground data-[state=active]:text-accent data-[state=active]:border-accent data-[state=active]:border-b-2 data-[state=active]:font-medium transition-colors"
-                    >
-                        Reviews
-                    </Tabs.Trigger>
-                )}
-                {guidesTableId && (
-                    <Tabs.Trigger 
-                      value="guides" 
-                      className="px-4 py-2 text-muted-foreground data-[state=active]:text-accent data-[state=active]:border-accent data-[state=active]:border-b-2 data-[state=active]:font-medium transition-colors"
-                    >
-                        Guides
-                    </Tabs.Trigger>
-                )}
-            </Tabs.List>
-
-            <Box pt="4"> {/* Increased padding */}
-                {/* Reviews Tab Content */}
-                {reviewsTableId && gameId && (
-                    <Tabs.Content value="reviews">
-                        <Flex direction="column" gap="6"> {/* Increased gap */} 
-                            {/* Create Button - Styled & English text */} 
-                            {!isCreatingReview && (
-                                <Flex justify="end"> 
-                                     <Button 
-                                       variant="outline" 
-                                       color="gray"
-                                       highContrast
-                                       className="border-accent text-accent hover:bg-accent/10 hover:text-accent transition-colors"
-                                       onClick={() => setIsCreatingReview(true)}
-                                      >
-                                        Write Review
-                                    </Button>
-                                </Flex>
-                            )}
-                            {/* Create Form Container & Cancel Button */}
-                            {isCreatingReview && (
-                                <Box className="bg-card rounded-lg shadow-sm p-5 border border-border space-y-4"> {/* Styled container */}
-                                    <CreateReviewForm gameId={gameId} onSuccess={handleReviewSuccess} />
-                                    <Button variant="ghost" color="gray" onClick={() => setIsCreatingReview(false)} >Cancel</Button>
-                                </Box>
-                            )}
-                            {/* Review List - Needs ReviewCard styling */}
-                            {renderReviewListContent()}
-                        </Flex>
-                    </Tabs.Content>
-                )}
-
-                {/* Guides Tab Content */}
-                {guidesTableId && gameId && (
-                    <Tabs.Content value="guides">
-                        <Flex direction="column" gap="6"> {/* Increased gap */} 
-                            {/* Create Button - Styled & English text */}
-                             {!isCreatingGuide && (
-                                <Flex justify="end">
-                                     <Button 
-                                       variant="outline" 
-                                       color="gray"
-                                       highContrast
-                                       className="border-accent text-accent hover:bg-accent/10 hover:text-accent transition-colors"
-                                       onClick={() => setIsCreatingGuide(true)}
-                                      >
-                                        Create Guide
-                                    </Button>
-                                </Flex>
-                            )}
-                            {/* Create Form Container & Cancel Button */}
-                            {isCreatingGuide && (
-                                <Box className="bg-card rounded-lg shadow-sm p-5 border border-border space-y-4"> {/* Styled container */}
-                                    <CreateGuideForm gameId={gameId} onSuccess={handleGuideSuccess} />
-                                    <Button variant="ghost" color="gray" onClick={() => setIsCreatingGuide(false)}>Cancel</Button>
-                                </Box>
-                            )}
-                            {/* Guide List - Needs GuideCard styling */}
-                            {renderGuideListContent()}
-                        </Flex>
-                    </Tabs.Content>
-                )}
-            </Box>
+      {/* Admin Upload Section - Conditionally Rendered */}
+      <Flex direction="column" gap="4">
+        <Tabs.Root value={activeTab} onValueChange={(value) => setActiveTab(value as 'reviews' | 'guides')}>
+          <Tabs.List>
+            <Tabs.Trigger value="reviews">Reviews</Tabs.Trigger>
+            <Tabs.Trigger value="guides">Guides</Tabs.Trigger>
+          </Tabs.List>
+          <Tabs.Content value="reviews">
+            <Flex direction="column" gap="4" className="mt-4">
+              {renderReviewListContent()}
+              {isCreatingReview && reviewsTableId && (
+                <CreateReviewForm 
+                  gameId={gameId!} 
+                  onSubmit={async (data) => { 
+                    console.log("Submitting review data:", data, "for table:", reviewsTableId);
+                    // Placeholder for actual submission call
+                    // await submitReviewTransaction(reviewsTableId, data.content, data.rating);
+                    await handleReviewSuccess(); 
+                  }}
+                />
+              )}
+              {!isCreatingReview && (
+                <Button 
+                  onClick={() => setIsCreatingReview(true)} 
+                  disabled={!reviewsTableId || !currentAccount} 
+                  className="mt-2 self-start"
+                >
+                  Add Your Review
+                </Button>
+                // TODO: Add a cancel button here if isCreatingReview is true and form is shown without internal cancel
+              )}
+            </Flex>
+          </Tabs.Content>
+          <Tabs.Content value="guides">
+            <Flex direction="column" gap="4" className="mt-4">
+              {renderGuideListContent()}
+              {isCreatingGuide && guidesTableId && (
+                <CreateGuideForm 
+                  gameId={gameId!} 
+                  onSubmit={async (data) => { 
+                    console.log("Submitting guide data:", data, "for table:", guidesTableId);
+                    // Placeholder for actual submission call
+                    // await submitGuideTransaction(guidesTableId, data.title, data.content);
+                    await handleGuideSuccess(); 
+                  }}
+                />
+              )}
+              {!isCreatingGuide && (
+                <Button 
+                  onClick={() => setIsCreatingGuide(true)} 
+                  disabled={!guidesTableId || !currentAccount} 
+                  className="mt-2 self-start"
+                >
+                  Create Guide
+                </Button>
+                // TODO: Add a cancel button here if isCreatingGuide is true and form is shown without internal cancel
+              )}
+            </Flex>
+          </Tabs.Content>
         </Tabs.Root>
-      )}
-    </Flex>
+      </Flex>
+    </Box>
   );
 };
 

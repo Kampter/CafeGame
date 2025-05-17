@@ -13,10 +13,10 @@ import type { LoadingProps } from '~~/types/components.types';
 // Use the imported LoadingProps type
 const Loading: FC<LoadingProps> = (/*{ message }*/) => {
   return (
-    <Flex direction="column" align="center" justify="center" gap="3" style={{ padding: 'var(--space-5)' }}>
+    <Flex direction="column" align="center" justify="center" gap="3" className="py-10">
       <Spinner size="3" />
       {/* {message && <Text color="gray">{message}</Text>} */}
-      <Text color="gray">Loading...</Text>
+      <Text className="text-muted-foreground">Loading...</Text>
     </Flex>
   )
 }

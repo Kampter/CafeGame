@@ -1,44 +1,77 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  // Keep dark mode variant structure if needed later, but colors will be defined below
-  darkMode: [
-    'variant',
-    [
-      '@media (prefers-color-scheme: dark) { &:not(.light *) }',
-      '&:is(.dark *)',
-    ],
+  darkMode: ["class"],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        // Wabi-Sabi Palette
-        background: '#F8F7F4',    // Warm off-white / Beige
-        foreground: '#333333',    // Dark gray for text
-        card: '#FFFFFF',         // White for cards
-        'card-foreground': '#333333',
-        muted: '#EAE8E1',        // Light brownish-gray
-        'muted-foreground': '#737373', // Medium gray text
-        accent: '#B88B4A',        // Ochre / Muted Gold
-        'accent-foreground': '#FFFFFF', // Text on accent
-        border: '#DCD9CF',        // Light border color
-
-        // Remove or comment out previous sds colors if unused
-        // 'sds-light': 'var(--sds-light)',
-        // 'sds-dark': 'var(--sds-dark)',
-        // 'sds-pink': 'var(--sds-pink)',
-        // 'sds-blue': 'var(--sds-blue)',
-        // 'sds-accent-a11': 'var(--accent-a11)',
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        'realm-bg': '#0D0F12',
+        'realm-bg-alt': '#121017',
+        'realm-surface-primary': '#1C1A27',
+        'realm-surface-secondary': '#1F232C',
+        'realm-surface-tertiary': '#252233',
+        'realm-text-primary': '#F0F0F5',
+        'realm-text-secondary': '#A8A5B3',
+        'realm-text-muted': '#6F6C7A',
+        'realm-border': '#353240',
+        'realm-neon-primary': '#00DFD8',
+        'realm-neon-secondary': '#7F5AF0',
+        'realm-neon-cta': '#F250A2',
+        'realm-neon-cta-alt': '#ADFF2F',
+        'realm-neon-warning': '#FF4757',
+        'realm-neon-error': '#FF6B35',
+        'realm-neutral-dot': '#FFFBF5',
       },
       fontFamily: {
-        // Keep Inter, add sans-serif fallback. Ensure 'Inter' font is loaded.
-        // Add Chinese font fallback if needed and loaded.
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif', '"Source Han Sans SC"', '"Noto Sans CJK SC"'], 
-        inter: 'var(--sds-font-inter)', // Keep if var is still used elsewhere, otherwise remove
+        sans: ["var(--font-sans)", "Inter", "Manrope", "Satoshi", "思源黑体", "Noto Sans CJK"],
       },
       boxShadow: {
-        // Remove or comment out previous toast shadow
-        // toast: 'inset 0 0 0 1px var(--accent-a7)',
+        'realm-glow-primary-xs': '0 0 5px -1px #00DFD8',
+        'realm-glow-primary-sm': '0 0 8px -2px #00DFD8, 0 0 4px -2px #00DFD8',
+        'realm-glow-primary-md': '0 0 15px -3px #00DFD8, 0 0 6px -3px #00DFD8',
+        'realm-glow-primary-lg': '0 0 25px -5px #00DFD8, 0 0 10px -5px #00DFD8',
+        'realm-glow-secondary-xs': '0 0 5px -1px #7F5AF0',
+        'realm-glow-secondary-sm': '0 0 8px -2px #7F5AF0, 0 0 4px -2px #7F5AF0',
+        'realm-glow-secondary-md': '0 0 15px -3px #7F5AF0, 0 0 6px -3px #7F5AF0',
+        'realm-glow-cta-md': '0 0 15px -3px #F250A2, 0 0 6px -3px #F250A2',
+        'realm-glow-cta-alt-md': '0 0 15px -3px #ADFF2F, 0 0 6px -3px #ADFF2F',
+        'realm-glow-error-md': '0 0 15px -3px #FF6B35, 0 0 6px -3px #FF6B35',
       },
     },
   },

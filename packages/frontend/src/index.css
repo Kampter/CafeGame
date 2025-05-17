@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Example: Define your color variables here if you were using them directly */
+    /* --background: 0 0% 100%; */
+    /* ... other variables ... */
+  }
+
+  /* Remove default browser margins and paddings for a cleaner slate */
+  /* body, html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Better box model by default */
+  /* } */
+
+  /* Apply a default background color to the body using Tailwind's theme */
+  body {
+    @apply bg-realm-background text-realm-text-primary;
+    font-feature-settings: "rlig" 1, "calt" 1; /* Enable common ligatures and contextual alternates */
+  }
+}
+
+.connect-button {
+  @apply bg-realm-neon-primary text-white hover:bg-realm-neon-primary/90 font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out;
+  /* Consider adding a subtle glow effect if desired, e.g., shadow-realm-glow-primary-sm */
+}
+
+/* Removing .scaffold-button as it seems to be a leftover or generic class,
+   and specific button styling should be handled by dedicated components like Button.tsx */ 

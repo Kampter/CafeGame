@@ -1,4 +1,4 @@
-import { Button, Card, Flex, Heading, IconButton, Text, TextField } from '@radix-ui/themes'
+import { Flex, Heading, IconButton, Text, Button, Spinner } from '@radix-ui/themes'
 import { FC, useState, ChangeEvent, FormEvent } from 'react'
 import useDashboardGames, { getGameIdsFromDynamicFields } from '~~/dapp/hooks/useDashboardGames'
 import {
@@ -9,6 +9,8 @@ import { TrashIcon } from 'lucide-react'
 import { Link as RouterLink } from 'react-router-dom'
 import Loading from '~~/components/Loading'
 import type { DashboardManagerProps } from '~~/dapp/types/dashboard.types';
+import { Card, CardHeader, CardContent, CardTitle } from '~~/components/ui/Card';
+import { Input } from '~~/components/ui/Input';
 
 const DashboardManager: FC<DashboardManagerProps> = ({
   dashboardId,
@@ -50,63 +52,70 @@ const DashboardManager: FC<DashboardManagerProps> = ({
   }
 
   if (!dashboardId) {
-      return <Text color="orange">Dashboard ID not provided.</Text>;
+      return <Text className="text-realm-neon-warning">Dashboard ID not provided.</Text>;
   }
 
   return (
-    <Card size="3" className="w-full max-w-md">
-      <Flex direction="column" gap="4">
-        <Heading size="4">Manage Dashboard</Heading> 
-        <Text size="2" color="gray">ID: {dashboardId}</Text>
+    <Card className="w-full max-w-md" glow>
+      <CardHeader>
+        <CardTitle>Manage Dashboard</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Flex direction="column" gap="4">
+          <Text size="2" className="text-realm-text-secondary">ID: {dashboardId}</Text>
 
-        <form onSubmit={handleRegisterSubmit} className="flex items-end gap-2">
-          <TextField.Root
-            className="flex-grow"
-            size="2"
-            placeholder="Enter Game Object ID (0x...)"
-            value={gameIdInput}
-            onChange={handleGameIdChange}
-            required
-          />
-          <Button 
-            type="submit" 
-            size="2" 
-            disabled={!gameIdInput.trim()}
-          >
-            Register Game
-          </Button>
-        </form>
+          <form onSubmit={handleRegisterSubmit} className="flex items-end gap-2">
+            <div className="flex-grow">
+              <Input
+                placeholder="Enter Game Object ID (0x...)"
+                value={gameIdInput}
+                onChange={handleGameIdChange}
+                required
+                name="gameIdInput"
+                disabled={registerMutationResult.isLoading || unregisterMutationResult.isLoading}
+              />
+            </div>
+            <Button 
+              type="submit" 
+              size="2" 
+              disabled={!gameIdInput.trim() || registerMutationResult.isLoading || unregisterMutationResult.isLoading}
+              variant='solid'
+            >
+              {registerMutationResult.isLoading ? <Spinner size="1" /> : 'Register Game'}
+            </Button>
+          </form>
 
-        <Flex direction="column" gap="2">
-          <Heading size="3">Registered Games</Heading>
-          {isLoadingGames ? (
-            <Loading />
-          ) : gamesError ? (
-            <Text color="red">Error loading games: {gamesError.message}</Text>
-          ) : gameIds.length === 0 ? (
-            <Text color="gray">No games registered yet.</Text>
-          ) : (
-            <ul className="list-disc space-y-1 pl-5">
-              {gameIds.map((gameId) => (
-                <li key={gameId} className="flex items-center justify-between gap-2">
-                  <RouterLink to={`/games/${gameId}`} className="truncate hover:underline flex-grow min-w-0" title={`View Game: ${gameId}`}>
-                    <Text size="2" className="font-mono block truncate">{gameId}</Text>
-                  </RouterLink>
-                  <IconButton 
-                    size="1" 
-                    variant="ghost" 
-                    color="red" 
-                    onClick={() => handleUnregisterClick(gameId)}
-                    title="Unregister Game"
-                  >
-                    <TrashIcon size={16}/>
-                  </IconButton>
-                </li>
-              ))}
-            </ul>
-          )}
+          <Flex direction="column" gap="2">
+            <Heading size="3" className="text-realm-neon-secondary">Registered Games</Heading>
+            {isLoadingGames ? (
+              <Loading />
+            ) : gamesError ? (
+              <Text className="text-realm-neon-warning">Error loading games: {gamesError.message}</Text>
+            ) : gameIds.length === 0 ? (
+              <Text className="text-realm-text-secondary">No games registered yet.</Text>
+            ) : (
+              <ul className="list-disc space-y-1 pl-5">
+                {gameIds.map((gameId) => (
+                  <li key={gameId} className="flex items-center justify-between gap-2">
+                    <RouterLink to={`/games/${gameId}`} className="truncate hover:underline flex-grow min-w-0" title={`View Game: ${gameId}`}>
+                      <Text size="2" className="font-mono block truncate">{gameId}</Text>
+                    </RouterLink>
+                    <IconButton 
+                      size="1" 
+                      variant="ghost" 
+                      color="red" 
+                      onClick={() => handleUnregisterClick(gameId)}
+                      title="Unregister Game"
+                    >
+                      <TrashIcon size={16}/>
+                    </IconButton>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Flex>
         </Flex>
-      </Flex>
+      </CardContent>
     </Card>
   )
 }

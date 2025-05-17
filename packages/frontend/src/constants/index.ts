@@ -1,0 +1,1 @@
+export const CONTRACT_PACKAGE_ID = '0xNOTDEFINED'; // 需要替换为实际的合约 ID 

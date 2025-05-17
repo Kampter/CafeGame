@@ -1,92 +1,78 @@
-import { FC, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { Button, TextField, TextArea, Flex, Text } from '@radix-ui/themes';
-import { useGuideMutations } from '~~/dapp/hooks/useGuideMutations';
-import toast from 'react-hot-toast';
-import type { SuiTransactionBlockResponse } from '@mysten/sui/client';
+import { FC } from 'react';
+import { useForm } from 'react-hook-form';
+import { useToast } from '~~/components/ui/use-toast';
+import { Button } from '~~/components/ui/Button';
+import { Input } from '~~/components/ui/Input';
+import { Textarea } from '~~/components/ui/Textarea';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '~~/components/ui/Card';
 
-interface CreateGuideFormData {
+interface CreateGuideFormProps {
+  gameId: string;
+  onSubmit: (data: { title: string; content: string }) => Promise<void>;
+}
+
+interface FormData {
   title: string;
   content: string;
 }
 
-interface CreateGuideFormProps {
-  gameId: string;
-  onSuccess?: () => void; // Callback on successful creation
-}
+export const CreateGuideForm: FC<CreateGuideFormProps> = ({ gameId, onSubmit }) => {
+  const { toast } = useToast();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>();
 
-// Constants for validation (should match backend)
-const MIN_GUIDE_CONTENT_LEN = 50;
-const MAX_GUIDE_CONTENT_LEN = 10000;
-
-const CreateGuideForm: FC<CreateGuideFormProps> = ({ gameId, onSuccess }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm<CreateGuideFormData>();
-  const { createGuide, isPending, error: mutationError } = useGuideMutations();
-
-  const onSubmit: SubmitHandler<CreateGuideFormData> = (data) => {
-    // --- Frontend Validation --- 
-    const contentLength = data.content.trim().length;
-    if (contentLength < MIN_GUIDE_CONTENT_LEN) {
-        toast.error(`Guide content must be at least ${MIN_GUIDE_CONTENT_LEN} characters long.`);
-        return; // Prevent submission
+  const onSubmitForm = async (data: FormData) => {
+    try {
+      await onSubmit(data);
+      toast({
+        title: '攻略已发布',
+        type: 'success',
+      });
+    } catch (error) {
+      toast({
+        title: '发布攻略失败',
+        description: error instanceof Error ? error.message : '请稍后重试',
+        type: 'error',
+      });
     }
-    if (contentLength > MAX_GUIDE_CONTENT_LEN) {
-        toast.error(`Guide content must be no more than ${MAX_GUIDE_CONTENT_LEN} characters long.`);
-        return; // Prevent submission
-    }
-    // --- End Validation ---
-
-    console.log('Submitting guide data:', data);
-    createGuide(
-      { 
-        gameId,
-        title: data.title,
-        content: data.content 
-      },
-      {
-        onSuccess: () => {
-          console.log('Guide creation mutation succeeded');
-          toast.success('Guide submitted successfully!');
-          onSuccess?.(); // Call the success callback if provided
-        },
-        onError: (err: any) => {
-          console.error("Guide submission error in component:", err);
-          // Error is already handled within the hook with a toast, 
-          // but you could add more specific component-level error handling here if needed.
-          // toast.error(`Failed to submit guide: ${err.message || 'Unknown error'}`);
-        },
-      }
-    );
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-      <Flex direction="column" gap="3">
-        <TextField.Root
-          placeholder="Guide Title"
-          {...register('title', { required: 'Title is required' })}
-        />
-        {errors.title && <Text color="red" size="1">{errors.title.message}</Text>}
-
-        <TextArea
-          placeholder={`Guide Content (minimum ${MIN_GUIDE_CONTENT_LEN} characters)`}
-          rows={6}
-          {...register('content', { 
-            required: 'Content is required',
-            minLength: { value: MIN_GUIDE_CONTENT_LEN, message: `Minimum length is ${MIN_GUIDE_CONTENT_LEN}` },
-            maxLength: { value: MAX_GUIDE_CONTENT_LEN, message: `Maximum length is ${MAX_GUIDE_CONTENT_LEN}` }
-           })}
-        />
-        {errors.content && <Text color="red" size="1">{errors.content.message}</Text>}
-
-        <Button type="submit" disabled={isPending}>
-          {isPending ? 'Submitting...' : 'Submit Guide'}
-        </Button>
-        {/* Display mutation error if any */}
-        {/* {mutationError && <Text color="red" size="1">Error: {mutationError.message}</Text>} */} 
-      </Flex>
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle>发布攻略</CardTitle>
+      </CardHeader>
+      <form onSubmit={handleSubmit(onSubmitForm)}>
+        <CardContent className="space-y-4">
+          <div>
+            <Input
+              placeholder="攻略标题"
+              {...register('title', { required: '请输入攻略标题' })}
+              error={errors.title?.message}
+            />
+          </div>
+          <div>
+            <Textarea
+              placeholder="分享你的游戏攻略..."
+              {...register('content', { 
+                required: '请输入攻略内容',
+                minLength: { value: 10, message: '攻略内容至少需要10个字符' },
+                maxLength: { value: 5000, message: '攻略内容不能超过5000个字符' }
+              })}
+              error={errors.content?.message}
+            />
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button
+            type="submit"
+            variant="primary"
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
+          >
+            发布攻略
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
   );
-};
-
-export default CreateGuideForm; 
+}; 

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Flex, Heading, Text, Box, ScrollArea, Link as RadixLink } from '@radix-ui/themes';
 import { Link } from 'react-router-dom';
+import { Star } from 'lucide-react';
 import { useFetchDashboardGames } from '../../hooks/useFetchDashboardGames';
 // Import the shared type
 import type { LeaderboardItemProps } from '../../types/dashboard.types';
@@ -19,17 +20,18 @@ const LeaderboardItem: React.FC<LeaderboardItemProps> = ({ rank, gameId, name, s
      <Flex 
        justify="between" 
        align="center" 
-       className="py-3 border-b border-border last:border-b-0"
+       className="py-3 border-b border-realm-border last:border-b-0"
      >
         <Flex align="center" gap="3">
-            <Text size="2" className="text-muted-foreground w-5 text-right">{rank}.</Text> {/* Adjusted width & alignment */}
+            <Text size="2" className="text-realm-text-secondary w-5 text-right">{rank}.</Text> {/* Adjusted width & alignment */}
              <RadixLink asChild>
-                 <Link to={`/game/${gameId}`} className="text-foreground hover:text-accent transition-colors">
+                 <Link to={`/game/${gameId}`} className="text-realm-text-primary hover:text-realm-neon-primary transition-colors">
                      <Text size="2" weight="medium" truncate>{name}</Text>
                  </Link>
              </RadixLink>
         </Flex>
-        <Text size="2" className="text-muted-foreground">{score}</Text>
+        {/* Directly render the score prop (which is now ReactNode) */}
+        {score}
     </Flex>
 );
 
@@ -51,10 +53,10 @@ export function TopRatedGamesLeaderboard() {
 
     return (
         // Wrap in a styled Box (Card-like)
-        <Box className="bg-card rounded-lg shadow-sm p-5 space-y-4">
-            <Heading id="top-rated-games-heading" as="h3" size="5" className="font-semibold text-foreground">Top Rated</Heading> {/* Changed title */}
-            {isLoading && <Text className="text-muted-foreground text-sm">Loading top rated games...</Text>}
-            {error && <Text className="text-red-600 text-sm">Error: {error}</Text>}
+        <Box className="bg-realm-surface-primary rounded-lg shadow-realm-glow-secondary-xs p-5 space-y-4">
+            <Heading id="top-rated-games-heading" as="h3" size="5" className="font-semibold text-realm-neon-secondary">Top Rated</Heading> {/* Changed title */}
+            {isLoading && <Text className="text-realm-text-secondary text-sm">Loading top rated games...</Text>}
+            {error && <Text className="text-destructive text-sm">Error: {error}</Text>}
             {!isLoading && !error && (
                  sortedGames.length > 0 ? (
                     <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: 300 }}>
@@ -66,13 +68,18 @@ export function TopRatedGamesLeaderboard() {
                                     rank={index + 1}
                                     gameId={game.gameId}
                                     name={game.name}
-                                    score={`⭐ ${(game.overallRate ?? 0).toFixed(1)}`}
+                                    score={(
+                                        <Flex align="center" gap="1">
+                                            <Star size={14} className="text-realm-neon-primary flex-shrink-0" /> 
+                                            <Text size="2" className="text-realm-neon-primary">{(game.overallRate ?? 0).toFixed(1)}</Text>
+                                        </Flex>
+                                    )}
                                 />
                             ))}
                         </Flex>
                     </ScrollArea>
                  ) : (
-                      <Text className="text-muted-foreground text-sm">No rated games found.</Text>
+                      <Text className="text-realm-text-secondary text-sm">No rated games found.</Text>
                  )
             )}
         </Box>

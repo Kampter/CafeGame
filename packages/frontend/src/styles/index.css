@@ -20,6 +20,101 @@
 } */
 
 @layer base {
+  :root {
+    /* 基础颜色 - 浅色模式 */
+    --background: 240 10% 98%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+
+    /* 霓虹主题颜色 */
+    --neon-primary: 180 100% 50%;    /* 静谧青蓝 */
+    --neon-secondary: 210 100% 50%;  /* 科技蓝 */
+    --neon-accent: 150 100% 50%;     /* 霓虹绿 */
+    --neon-glow: 180 100% 50%;       /* 霓虹辉光 */
+
+    /* 评分颜色 */
+    --rating-high: 45 100% 50%;
+    --rating-medium: 30 100% 50%;
+    --rating-low: 0 100% 50%;
+
+    /* 状态颜色 */
+    --status-success: 160 100% 50%;
+    --status-warning: 35 100% 50%;
+    --status-error: 0 100% 50%;
+    --status-info: 200 100% 50%;
+
+    /* 徽章颜色 */
+    --badge-primary: 210 100% 50%;
+    --badge-secondary: 150 100% 50%;
+    --badge-accent: 180 100% 50%;
+  }
+
+  .dark {
+    /* 基础颜色 - 深色模式 - 更新为 "活力霓虹境" 调色板 */
+    --background: #0D0F12;                       /* realm-bg */
+    --foreground: #F0F0F5;                       /* realm-text-primary */
+    --card: #1C1A27;                             /* realm-surface-primary */
+    --card-foreground: #F0F0F5;                  /* realm-text-primary */
+    --popover: #1C1A27;                          /* realm-surface-primary */
+    --popover-foreground: #F0F0F5;               /* realm-text-primary */
+    --primary: #00DFD8;                          /* realm-neon-primary */
+    --primary-foreground: #0D0F12;               /* realm-bg (for high contrast on neon bg) */
+    --secondary: #252233;                        /* realm-surface-tertiary */
+    --secondary-foreground: #F0F0F5;             /* realm-text-primary */
+    --muted: #1F232C;                            /* realm-surface-secondary (for muted surfaces) */
+    --muted-foreground: #6F6C7A;                 /* realm-text-muted */
+    --accent: #7F5AF0;                           /* realm-neon-secondary */
+    --accent-foreground: #0D0F12;                /* realm-bg (for high contrast on neon bg) */
+    --destructive: #FF4757;                      /* realm-neon-warning */
+    --destructive-foreground: #0D0F12;           /* realm-bg */
+    --border: #353240;                           /* realm-border */
+    --input: #353240;                            /* realm-border (used for input borders) */
+    --ring: #00DFD8;                             /* realm-neon-primary (for focus rings) */
+
+    /* 霓虹主题颜色 - 深色模式下增强亮度 - 这些可以考虑移除或与上面的霓虹色对齐 */
+    /* 如果上面的 --primary, --accent 等已经是最终的霓虹色，这些可以精简 */
+    /* 为了保持与旧代码的兼容性，暂时保留并更新值，后续可以清理 */
+    --neon-primary: #00DFD8;    /* realm-neon-primary */
+    --neon-secondary: #7F5AF0;  /* realm-neon-secondary */
+    --neon-accent: #ADFF2F;     /* realm-neon-cta-alt (using one of the CTA neons for general accent here) */
+    --neon-glow: #00DFD8;       /* realm-neon-primary (glow color often matches the base neon) */
+
+    /* 评分颜色 - 根据新设计指南调整或确认 */
+    /* 设计指南未明确指定评分颜色，暂时保持或后续调整 */
+    --rating-high: #ADFF2F; /* Neon Green for high ratings */
+    --rating-medium: #FFC700; /* A bright yellow for medium */
+    --rating-low: #FF6B35;  /* Acid Orange for low ratings */
+
+    /* 状态颜色 - 使用新的霓虹错误和警告色，成功和信息色也用霓虹色 */
+    --status-success: #ADFF2F;   /* realm-neon-cta-alt (Green) */
+    --status-warning: #FF6B35;   /* realm-neon-error (Orange) */
+    --status-error: #FF4757;     /* realm-neon-warning (Red) */
+    --status-info: #00DFD8;      /* realm-neon-primary (Cyan) */
+
+    /* 徽章颜色 - 示例，具体根据设计调整 */
+    /* 设计指南中徽章背景可以是半透明表面色或次级霓虹色 */
+    --badge-primary: #7F5AF0;       /* realm-neon-secondary (Purple) */
+    --badge-secondary: #00DFD8;    /* realm-neon-primary (Cyan) */
+    --badge-accent: #F250A2;       /* realm-neon-cta (Pink) */
+  }
+
   body {
     /* Apply base colors and font from Tailwind */
     @apply bg-background text-foreground;
@@ -35,27 +130,90 @@
     -moz-osx-font-smoothing: grayscale;
     /* Set default font family using Tailwind's theme */
     font-family: theme('fontFamily.sans');
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 
   #root {
     /* Allow root to take full width and necessary height */
     width: 100%;
     display: flex; /* Keep flex for layout structure like header/main/footer */
-  flex-direction: column;
-  min-height: 100vh;
+    flex-direction: column;
+    min-height: 100vh;
   }
 }
 
 /* Keep custom styles for connect button for now, review later */
 .sds-connect-button-container {
   button {
-    padding: 8px 16px !important;
-    border-radius: 8px !important;
+    /* Apply theme-aware styles using Tailwind utilities and !important */
+    @apply border border-border bg-transparent text-foreground
+           px-4 py-2 rounded-md /* Adjust padding/radius as needed */
+           hover:border-accent hover:text-accent hover:bg-accent hover:bg-opacity-10
+           transition-colors !important; /* Add !important */
+    /* Remove specific overrides, rely on @apply */
+    /* padding: 8px 16px !important; */
+    /* border-radius: 8px !important; */
   }
   div {
-    font-size: 16px !important;
-    line-height: 24px !important;
-    font-family: inherit !important;
+    /* Remove font overrides, let it inherit */
+    /* font-size: 16px !important; */
+    /* line-height: 24px !important; */
+    /* font-family: inherit !important; */
   }
 }
-/* ~ Custom styles where it's not possible to use Tailwind classes. */
+/* ~ Custom styles where it\'s not possible to use Tailwind classes. */
+
+/* 自定义连接按钮样式 */
+.connect-button {
+  @apply bg-realm-neon-primary text-white hover:bg-realm-neon-primary/90
+         hover:shadow-realm-glow-primary-sm transition-all duration-300;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .neon-card {
+    @apply bg-card text-card-foreground rounded-lg border border-border transition-all duration-300
+           hover:shadow-neon-glow hover:border-neon-primary/50;
+  }
+
+  .neon-button {
+    @apply bg-neon-primary text-white hover:bg-neon-primary/90 
+           transition-all duration-300 rounded-md px-4 py-2
+           hover:shadow-neon-glow;
+  }
+
+  .neon-button-secondary {
+    @apply bg-neon-secondary text-white hover:bg-neon-secondary/90 
+           transition-all duration-300 rounded-md px-4 py-2
+           hover:shadow-neon-glow;
+  }
+
+  .neon-input {
+    @apply bg-card border border-border rounded-md px-3 py-2 
+           focus:border-neon-primary focus:ring-1 focus:ring-neon-primary 
+           focus:shadow-neon-glow-sm transition-all duration-300;
+  }
+
+  .neon-badge {
+    @apply bg-neon-accent/10 text-neon-accent px-2 py-1 rounded-full text-sm
+           border border-neon-accent/20;
+  }
+
+  .neon-title {
+    @apply text-2xl font-bold bg-gradient-to-r from-neon-primary to-neon-secondary
+           bg-clip-text text-transparent;
+  }
+
+  .neon-subtitle {
+    @apply text-lg text-neon-primary/80;
+  }
+}

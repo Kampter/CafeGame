@@ -12,6 +12,7 @@ import { useFetchDashboardGames } from '../hooks/useFetchDashboardGames';
 // Import the type from its correct location
 import type { DashboardGameData } from '~~/dapp/types/dashboard.types'; 
 import { GameCard } from '../components/game/GameCard';
+import { Button as CustomButton } from '~~/components/ui/Button'; // Renamed import to avoid conflict
 
 // --- Recommended Games Section --- 
 const RecommendedGamesSection: FC = () => {
@@ -21,10 +22,12 @@ const RecommendedGamesSection: FC = () => {
      return (
         // Use Tailwind classes for spacing
         <section aria-labelledby="recommended-games-heading" className="space-y-4">
-            <Heading id="recommended-games-heading" as="h2" size="5" className="font-semibold text-foreground">Recommended For You</Heading>
+            <Heading id="recommended-games-heading" as="h2" size="5" className="font-semibold text-realm-neon-secondary">
+              Recommended For You
+            </Heading>
             {isLoading && <Text className="text-muted-foreground">Loading recommendations...</Text>}
-            {/* TODO: Define error color in theme */}
-            {error && <Text className="text-red-600">Error loading games: {error}</Text>}
+            {/* Use semantic destructive color */}
+            {error && <Text className="text-destructive">Error loading games: {error}</Text>}
             {!isLoading && !error && (
                  recommended.length > 0 ? (
                     // Adjust grid gap
@@ -37,7 +40,7 @@ const RecommendedGamesSection: FC = () => {
                                 genre={game.genre || 'N/A'} 
                                 platform={game.platform || 'N/A'}
                                 overallRate={game.overallRate}
-                                // imageUrl={game.imageUrl}
+                                imageUrl={game.imageUrl}
                             />
                         ))}
                     </Grid>
@@ -52,39 +55,28 @@ const RecommendedGamesSection: FC = () => {
 // --- Main Index Page Component ---
 const IndexPage: FC = () => {
   return (
-    // Remove Layout wrapper
     <>
       <NetworkSupportChecker><></></NetworkSupportChecker> 
-      {/* Adjust main container padding and remove max-width */}
-      <Flex direction="column" align="stretch" gap="10" className="flex-grow"> 
-        
-        {/* Keep existing DashboardFeature if it holds general dashboard elements like user stats? */}
-        {/* Review if DashboardFeature needs removal or modification */}
-        {/* <DashboardFeature /> */} 
+      <Flex direction="column" align="stretch" className="flex-grow space-y-6">
 
-        <Flex justify="between" align="center">
-             {/* Update Heading */}
-             <Heading as="h1" size="7" weight="bold" className="text-foreground">Discover Games</Heading>
-             {/* Style Button according to Wabi-Sabi */}
-             <Button 
-               variant="outline" // Use outline style
-               color="gray" // Use neutral color for border/text
-               highContrast // Ensure text visibility
-               size="3" 
-               className="border-accent text-accent hover:bg-accent/10 hover:text-accent transition-colors" // Apply accent colors on hover/border
-               asChild
-             >
-                 <Link to="/create-game">
-                     List New Game
-                 </Link>
-             </Button>
+        <Flex justify="between" align="center" className="mb-2">
+             <Heading as="h1" size="7" weight="bold" className="text-realm-neon-primary">
+              Discover Games
+             </Heading>
+             <CustomButton asChild variant="outline" size="sm"> 
+               <Link 
+                 to="/create-game"
+               >
+                 List New Game
+               </Link>
+             </CustomButton>
         </Flex>
 
-        {/* Recommended Games Section */}
+        <div className="mb-6">
         <RecommendedGamesSection />
+        </div>
 
-        {/* Leaderboards Section - Adjust gap */}
-        <Flex gap="8" direction={{ initial: 'column', md: 'row' }} justify="between">
+        <Flex gap="4" direction={{ initial: 'column', md: 'row' }} justify="between" className="border-t border-border pt-4">
             <Box flexGrow="1" style={{ minWidth: 0 }}> 
                  <HotGamesLeaderboard />
             </Box>

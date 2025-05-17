@@ -122,6 +122,7 @@ export interface IGame {
   price: string;
   description: string;
   game_package_url: string;
+  imageUrl?: string; // Added optional imageUrl for game cover
 }
 
 // Type for the fields within the Game object content (from game.ts)

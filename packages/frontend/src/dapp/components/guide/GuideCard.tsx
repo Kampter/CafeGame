@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Box, Text, Flex, IconButton, Tooltip, Badge, Heading } from '@radix-ui/themes';
+import { Box, Text, Flex, IconButton, Tooltip, Heading } from '@radix-ui/themes';
 import { Heart, Eye } from 'lucide-react';
 import { GuideData } from '../../types/guide.types'; // Assuming GuideData is exported here
 import { formatDistanceToNow } from 'date-fns'; // For relative time
@@ -9,19 +9,12 @@ import { Link } from 'react-router-dom'; // Re-import Link
 // Helper to format address (reuse or move to a central helper file)
 const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
-// Define badge styles using Tailwind classes (can be more sophisticated later)
+// Updated badge styling to use realm colors directly
 const getGuideTypeClasses = (type: string) => {
+    // Base classes for all badges
     const baseClasses = "inline-block rounded-full px-2.5 py-0.5 text-xs font-medium";
-    switch (type.toLowerCase()) {
-        // Use muted background with slightly colored text for subtlety 
-        case 'walkthrough': return `${baseClasses} bg-blue-100 text-blue-700`;
-        case 'tipsandtricks': return `${baseClasses} bg-green-100 text-green-700`;
-        case 'characterguide': return `${baseClasses} bg-purple-100 text-purple-700`;
-        case 'bossstrategy': return `${baseClasses} bg-red-100 text-red-700`;
-        case 'resourcefarming': return `${baseClasses} bg-amber-100 text-amber-700`;
-        case 'levelupguide': return `${baseClasses} bg-teal-100 text-teal-700`;
-        default: return `${baseClasses} bg-muted text-muted-foreground`;
-    }
+    // Consistent realm styling for now, can be differentiated more later
+    return `${baseClasses} bg-realm-surface-secondary text-realm-text-primary`; 
 };
 
 const GuideCard: FC<GuideCardProps> = ({ guide }) => {
@@ -30,49 +23,52 @@ const GuideCard: FC<GuideCardProps> = ({ guide }) => {
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent link navigation when clicking button
     console.log('Liking guide:', guide.guideId);
-    alert('Liking not implemented yet.');
+    // toast({ title: 'Liking not implemented yet.', type:'info'});
   };
 
   return (
     // Use Link directly, styling the inner Box as the card
     <Link 
         to={`/guide/${guide.guideId}`} 
-        className="block group bg-card rounded-lg shadow-sm p-5 border border-border hover:shadow-md transition-all duration-200 ease-in-out space-y-3"
+        className="block group bg-realm-surface-primary border border-realm-border rounded-lg p-4 space-y-3 shadow-sm hover:shadow-realm-glow-primary-md hover:border-realm-neon-primary/30 transition-all duration-300 ease-in-out"
     >
         {/* Header: Title, Author, Time, Badge */}
         <Flex justify="between" align="start" gap="3">
-            <Box className="flex-grow">
-                <Heading size="4" mb="1" className="text-foreground group-hover:text-accent transition-colors">
+            <Box className="flex-grow min-w-0"> {/* Added min-w-0 for truncation */}
+                <Heading size="4" mb="1" className="text-realm-text-primary group-hover:text-realm-neon-primary transition-colors duration-200 truncate">
                     {guide.title}
                 </Heading>
-                <Flex gap="2" align="center" className="text-xs text-muted-foreground">
+                <Flex gap="2" align="center" className="text-xs">
                   <Tooltip content={guide.owner}>
-                        <span>By: {formatAddress(guide.owner)}</span>
+                    <Text className="text-realm-text-secondary">
+                        By: <span className="text-realm-neon-secondary font-medium">{formatAddress(guide.owner)}</span>
+                    </Text>
                   </Tooltip>
-                    <span>•</span> {/* Separator */}
-                    <span>{formatDistanceToNow(new Date(guide.createdAt), { addSuffix: true })}</span>
+                    <Text className="text-realm-text-secondary">•</Text> 
+                    <Text className="text-realm-text-secondary">
+                        {formatDistanceToNow(new Date(guide.createdAt), { addSuffix: true })}
+                    </Text>
                </Flex>
            </Box>
-            {/* Styled Badge */}
-            <span className={`${getGuideTypeClasses(guide.guideType)} flex-shrink-0`}>
+            <span className={`${getGuideTypeClasses(guide.guideType)} flex-shrink-0 ml-2`}> {/* Added ml-2 for spacing */}
                 {guide.guideType}
             </span>
         </Flex>
 
         {/* Footer: Likes, Views */}
-        <Flex justify="end" align="center" gap="4" className="text-sm text-muted-foreground">
+        <Flex justify="end" align="center" gap="4" className="text-sm mt-2"> {/* Added mt-2 */}
             <Tooltip content="Likes">
                 <Flex align="center" gap="1">
-                    <IconButton size="1" variant="ghost" className="text-muted-foreground hover:text-red-600 hover:bg-red-100/50 rounded-full" onClick={handleLike}>
+                    <IconButton size="1" variant="ghost" className="text-realm-text-secondary hover:text-realm-neon-cta hover:bg-realm-surface-secondary rounded-full transition-colors" onClick={handleLike}>
                         <Heart size={16} />
                     </IconButton>
-                    <Text size="2">{guide.likes}</Text>
+                    <Text size="2" className="text-realm-text-secondary group-hover:text-realm-neon-cta transition-colors">{guide.likes}</Text>
                 </Flex>
             </Tooltip>
              <Tooltip content="Views">
                  <Flex align="center" gap="1">
-                    <Eye size={16} className="text-muted-foreground"/>
-                    <Text size="2">{guide.views}</Text>
+                    <Eye size={16} className="text-realm-text-secondary"/>
+                    <Text size="2" className="text-realm-text-secondary">{guide.views}</Text>
                 </Flex>
             </Tooltip>
         </Flex>

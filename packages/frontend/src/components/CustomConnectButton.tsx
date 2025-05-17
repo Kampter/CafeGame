@@ -1,5 +1,6 @@
 import { ConnectModal, useCurrentAccount } from '@mysten/dapp-kit'
-import { Button } from '@radix-ui/themes'
+// import { Button as RadixButton } from '@radix-ui/themes'
+import { Button } from '~~/components/ui/Button'
 
 const CustomConnectButton = () => {
   const currentAccount = useCurrentAccount()
@@ -7,7 +8,10 @@ const CustomConnectButton = () => {
   return (
     <ConnectModal
       trigger={
-        <Button variant="solid" size="4">
+        <Button 
+          variant="primary"
+          size="lg"
+        >
           {currentAccount ? 'Wallet Connected' : 'Connect Wallet'}
         </Button>
       }

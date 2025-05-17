@@ -1,62 +1,55 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import { Slot } from '@radix-ui/react-slot';
+import { FC, ButtonHTMLAttributes } from 'react';
+import { cn } from '~~/lib/utils';
 
-import { cn } from "~~/lib/utils" // 假设你有一个 cn 工具函数，如果没有，需要创建或直接使用 twMerge
-import type { ButtonProps } from "~~/types/components.types";
-
-export const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
-
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))} // 使用 cn 函数合并类名
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-)
-Button.displayName = "Button"
-
-export { Button }
-
-// 你需要在项目中创建一个 `lib/utils.ts` 文件（如果还没有的话）
-// 并添加以下 `cn` 函数:
-/*
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  asChild?: boolean;
+  variant?: 'primary' | 'secondary' | 'outline' | 'cta' | 'link';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  isLoading?: boolean;
 }
-*/ 
+
+export const Button: FC<ButtonProps> = ({ 
+  className, 
+  variant = 'primary',
+  size = 'default',
+  isLoading = false,
+  disabled,
+  asChild = false,
+  children,
+  ...props 
+}) => {
+  const Comp = asChild ? Slot : 'button';
+  return (
+    <Comp
+      className={cn(
+        'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-realm-neon-primary focus-visible:ring-offset-2 focus-visible:ring-offset-realm-bg-primary disabled:pointer-events-none disabled:opacity-50',
+        {
+          'bg-realm-neon-primary text-realm-bg-primary hover:bg-realm-neon-primary/90 shadow-realm-glow-primary-xs hover:shadow-realm-glow-primary-sm': variant === 'primary',
+          'bg-transparent text-realm-text-secondary hover:text-realm-neon-primary hover:bg-realm-surface-primary/50': variant === 'secondary',
+          'bg-transparent border border-realm-border text-realm-text-secondary hover:border-realm-neon-secondary hover:text-realm-neon-secondary': variant === 'outline',
+          'bg-realm-neon-cta text-white hover:bg-realm-neon-cta/90 shadow-realm-glow-cta-xs hover:shadow-realm-glow-cta-sm': variant === 'cta',
+          'bg-transparent text-realm-neon-primary hover:text-realm-neon-primary/80 underline-offset-4 hover:underline': variant === 'link',
+          'h-10 px-4 py-2': size === 'default',
+          'h-9 rounded-md px-3': size === 'sm',
+          'h-11 rounded-md px-8': size === 'lg',
+          'h-10 w-10': size === 'icon',
+        },
+        className
+      )}
+      disabled={!asChild && (isLoading || disabled)}
+      {...props}
+    >
+      {asChild ? (
+        children
+      ) : (
+        <>
+          {isLoading && (
+            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          )}
+          {children}
+        </>
+      )}
+    </Comp>
+  );
+}; 

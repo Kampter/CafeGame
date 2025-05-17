@@ -19,17 +19,18 @@ const LeaderboardItem: React.FC<LeaderboardItemProps> = ({ rank, gameId, name, s
      <Flex 
        justify="between" 
        align="center" 
-       className="py-3 border-b border-border last:border-b-0"
+       className="py-3 border-b border-realm-border last:border-b-0"
      >
         <Flex align="center" gap="3">
-            <Text size="2" className="text-muted-foreground w-5 text-right">{rank}.</Text> {/* Adjusted width & alignment */}
+            <Text size="2" className="text-realm-text-secondary w-5 text-right">{rank}.</Text> {/* Adjusted width & alignment */}
              <RadixLink asChild>
-                 <Link to={`/game/${gameId}`} className="text-foreground hover:text-accent transition-colors">
+                 <Link to={`/game/${gameId}`} className="text-realm-text-primary hover:text-realm-neon-primary transition-colors">
                      <Text size="2" weight="medium" truncate>{name}</Text>
                  </Link>
              </RadixLink>
         </Flex>
-        <Text size="2" className="text-muted-foreground">{score}</Text>
+        {/* Directly render the score prop (which is now ReactNode) */}
+        {score}
     </Flex>
 );
 
@@ -51,10 +52,10 @@ export function HotGamesLeaderboard() {
 
     return (
         // Wrap in a styled Box (Card-like)
-        <Box className="bg-card rounded-lg shadow-sm p-5 space-y-4">
-            <Heading id="hot-games-heading" as="h3" size="5" className="font-semibold text-foreground">Most Popular</Heading> {/* Changed title */}
-             {isLoading && <Text className="text-muted-foreground text-sm">Loading popular games...</Text>}
-            {error && <Text className="text-red-600 text-sm">Error: {error}</Text>}
+        <Box className="bg-realm-surface-primary rounded-lg shadow-realm-glow-secondary-xs p-5 space-y-4">
+            <Heading id="hot-games-heading" as="h3" size="5" className="font-semibold text-realm-neon-secondary">Most Popular</Heading> {/* Changed title */}
+             {isLoading && <Text className="text-realm-text-secondary text-sm">Loading popular games...</Text>}
+            {error && <Text className="text-destructive text-sm">Error: {error}</Text>}
             {!isLoading && !error && (
                  sortedGames.length > 0 ? (
                     <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: 300 }}>
@@ -66,13 +67,16 @@ export function HotGamesLeaderboard() {
                                     rank={index + 1}
                                     gameId={game.gameId}
                                     name={game.name}
-                                    score={`${game.numReviews ?? 0} Reviews`} // Example score display
+                                    // Pass score as a styled Text element
+                                    score={(
+                                        <Text size="2" className="text-realm-text-secondary">{`${game.numReviews ?? 0} Reviews`}</Text>
+                                    )}
                                 />
                             ))}
                         </Flex>
                     </ScrollArea>
                  ) : (
-                    <Text className="text-muted-foreground text-sm">No popular games found.</Text>
+                    <Text className="text-realm-text-secondary text-sm">No popular games found.</Text>
                  )
             )}
         </Box>

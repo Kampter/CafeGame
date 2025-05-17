@@ -1,3 +1,5 @@
+import React from 'react'; // Import React for ReactNode
+
 // Types related to Dashboard feature
 
 export interface DashboardManagerProps {
@@ -16,6 +18,7 @@ export interface DashboardGameData {
     platform?: string;
     overallRate?: number;
     numReviews?: number;
+    imageUrl?: string;
     // Add other fields like imageUrl if needed
 }
 
@@ -24,7 +27,7 @@ export interface LeaderboardItemProps {
     rank: number;
     gameId: string;
     name: string;
-    score: number | string; // Can be rating or review count
+    score: React.ReactNode; // Changed type to ReactNode
 }
 
 // Add other dashboard related types here later 

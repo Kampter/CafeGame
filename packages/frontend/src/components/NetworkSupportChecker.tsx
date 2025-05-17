@@ -43,7 +43,7 @@ const NetworkSupportChecker: FC<NetworkSupportCheckerProps> = ({ children }) => 
   return (
     <>
     <div className="mx-auto w-full max-w-lg px-3 py-2">
-        <div className="w-full rounded border border-red-400 bg-red-50 px-3 py-2 text-center text-red-600">
+        <div className="w-full rounded border border-destructive-border bg-destructive-background px-3 py-2 text-center text-destructive">
           {walletNetworkName ? (
             <>
               The connected network <span className="font-bold">{walletNetworkName.toUpperCase()}</span> is not currently supported by the app.

@@ -276,55 +276,74 @@ export function UploadGameFile({ gameId, adminCapId }: UploadGameFileProps) {
   const isLoading = ![ 'idle', 'success', 'error'].includes(uploadStep);
 
   return (
-    <Card style={{ maxWidth: 500, marginTop: '20px' }}>
-      <Heading size="4" mb="3">Upload New Game File (Admin)</Heading>
-      <Flex direction="column" gap="3">
+    <Card className="max-w-lg mt-5 bg-card border border-border rounded-lg shadow-sm dark:shadow-none p-5">
+      <Heading size="4" mb="3" className="text-foreground">Upload New Game File (Admin)</Heading>
+      <Flex direction="column" gap="4">
         <Box>
-          <label htmlFor="gameFileInput" style={{ display: 'block', marginBottom: '5px' }}>Select Game File:</label>
+          <label htmlFor="gameFileInput" className="block mb-1 text-sm font-medium text-foreground">Select Game File:</label>
         <input 
             id="gameFileInput" 
             type="file" 
             onChange={handleFileChange} 
             disabled={isLoading} 
-            // style={{ marginTop: '5px' }} // Remove margin, use gap
+            className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border file:border-border file:bg-card file:text-sm file:font-semibold file:text-accent hover:file:bg-accent hover:file:bg-opacity-10 disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </Box>
 
         <Box>
-          <label htmlFor="storageEpochsInput" style={{ display: 'block', marginBottom: '5px' }}>Storage Duration (Epochs, ~6 hours each):</label>
-          <input
-            id="storageEpochsInput"
-            type="number"
-            value={storageEpochs}
-            onChange={handleEpochChange}
-            min="1"
-            disabled={isLoading}
-            style={{ width: '100px' }}
-          />
-          <Text size="1" color="gray" style={{ marginLeft: '10px' }}>
-            (e.g., 365 for ~1 year, 1825 for ~5 years)
-          </Text>
+          <label htmlFor="storageEpochsInput" className="block mb-1 text-sm font-medium text-foreground">Storage Duration (Epochs, ~6 hours each):</label>
+          <Flex align="center" gap="2">
+            <input
+              id="storageEpochsInput"
+              type="number"
+              value={storageEpochs}
+              onChange={handleEpochChange}
+              min="1"
+              disabled={isLoading}
+              className="w-24 px-3 py-2 border rounded-md bg-card border-border placeholder:text-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            <Text size="1" className="text-muted-foreground">
+              (e.g., 365 for ~1 year, 1825 for ~5 years)
+            </Text>
+          </Flex>
         </Box>
 
-        <Button onClick={uploadFile} disabled={!file || isLoading || storageEpochs < 1}>
+        <button 
+          type="button"
+          onClick={uploadFile} 
+          disabled={!file || isLoading || storageEpochs < 1}
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-foreground hover:bg-accent hover:bg-opacity-90 h-10 px-4 py-2"
+        >
           {isLoading ? <Spinner /> : 'Upload and Associate File'}
-        </Button>
+        </button>
 
         {uploadStep !== 'idle' && (
           <Flex direction="column" gap="1" mt="2">
-            <Text size="2" weight="bold">Status: {uploadStep}</Text>
-            <Text size="2" color="gray">{stepMessages[uploadStep]}</Text>
-            {blobId && <Text size="1" color="gray">Blob ID: {blobId.substring(0,10)}...</Text>}
+            <Text size="2" weight="bold" className="text-foreground">Status: {uploadStep}</Text>
+            <Text size="2" className="text-muted-foreground">{stepMessages[uploadStep]}</Text>
+            {blobId && <Text size="1" className="text-muted-foreground">Blob ID: {blobId.substring(0,10)}...</Text>}
           </Flex>
         )}
         {errorMsg && (
-            <Text color="red" size="2" mt="2">Error: {errorMsg}</Text>
+            <Text className="text-destructive text-sm mt-2">Error: {errorMsg}</Text>
         )}
         {uploadStep === 'success' && (
-            <Button variant="soft" color="green" mt="2" onClick={resetState}>Upload Another File</Button>
+            <button 
+              type="button" 
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-success-border bg-success-background text-success-foreground hover:bg-success-background/80 h-9 px-3 mt-2"
+              onClick={resetState}
+            >
+              Upload Another File
+            </button>
         )}
          {uploadStep === 'error' && (
-            <Button variant="soft" color="amber" mt="2" onClick={resetState}>Try Again</Button>
+            <button 
+              type="button" 
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-warning-border bg-warning-background text-warning-foreground hover:bg-warning-background/80 h-9 px-3 mt-2"
+              onClick={resetState}
+            >
+              Try Again
+            </button>
          )}
       </Flex>
     </Card>

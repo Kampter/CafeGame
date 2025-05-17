@@ -6,6 +6,7 @@ import Footer from './Footer';
 // You might want to add a Footer component here later
 // Import the extracted type
 import type { AppLayoutProps } from '~~/types/components.types';
+import { TooltipProvider } from '@radix-ui/react-tooltip'; // Import TooltipProvider
 
 // Remove original AppLayoutProps definition
 // interface AppLayoutProps {
@@ -15,7 +16,8 @@ import type { AppLayoutProps } from '~~/types/components.types';
 // Use the imported AppLayoutProps type
 const AppLayout: FC<AppLayoutProps> = () => {
   return (
-    // Use Tailwind classes for main layout structure
+    // Wrap the entire layout content with TooltipProvider
+    <TooltipProvider>
     <Box className="flex flex-col min-h-screen">
       <Header />
       {/* Adjust padding for main content area based on Wabi-Sabi style (more whitespace) */}
@@ -24,6 +26,7 @@ const AppLayout: FC<AppLayoutProps> = () => {
       </main>
       <Footer />
     </Box>
+    </TooltipProvider>
   );
 };
 

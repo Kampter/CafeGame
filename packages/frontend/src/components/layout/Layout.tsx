@@ -6,7 +6,7 @@ import Header from '~~/components/layout/Header'
 
 const Layout: FC<PropsWithChildren> = ({ children }) => {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6">
+    <div className="flex min-h-screen flex-col gap-6">
       <Header />
 
       <Body>{children}</Body>
