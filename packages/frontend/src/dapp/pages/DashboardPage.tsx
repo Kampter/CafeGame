@@ -1,4 +1,3 @@
-import React from 'react';
 import DashboardFeature from '../components/dashboard/DashboardFeature';
 import Layout from '~~/components/layout/Layout';
 import NetworkSupportChecker from '../../components/NetworkSupportChecker';

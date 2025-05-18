@@ -1,15 +1,14 @@
 import { FC } from 'react';
 import { Box, Heading, Text, Flex } from '@radix-ui/themes';
 import Loading from '../../../components/Loading';
-import { useFetchGuides, GuideData } from '../../hooks/useFetchGuides';
+import { useFetchGuides } from '../../hooks/useFetchGuides';
 import GuideCard from './GuideCard';
 
 interface GuidesSectionProps {
-  gameId: string;
   guidesTableId: string | undefined; // The ID of the ObjectTable<address, Guide>
 }
 
-const GuidesSection: FC<GuidesSectionProps> = ({ gameId, guidesTableId }) => {
+const GuidesSection: FC<GuidesSectionProps> = ({ guidesTableId }) => {
   const { guides, isLoading, error } = useFetchGuides(guidesTableId);
 
   console.log('[GuidesSection] Hook State:', { isLoading, error, guides, guidesTableId });

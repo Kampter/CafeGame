@@ -1,4 +1,4 @@
-import { Card, Text, Flex, Heading, Box, Avatar } from '@radix-ui/themes';
+import { Card, Text, Flex, Heading, Avatar } from '@radix-ui/themes';
 import { Link } from 'react-router-dom';
 import type { GuideData } from '~~/dapp/types/guide.types';
 import { formatAddress } from '@mysten/sui/utils';

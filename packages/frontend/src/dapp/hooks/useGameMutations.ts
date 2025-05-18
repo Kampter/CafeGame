@@ -1,8 +1,7 @@
 import { SuiSignAndExecuteTransactionOutput } from '@mysten/wallet-standard';
-import { SuiTransactionBlockResponse, SuiObjectChangeCreated, SuiObjectChange, SuiClient, SuiTransactionBlockResponseOptions } from '@mysten/sui/client';
+import { SuiTransactionBlockResponse, SuiObjectChangeCreated, SuiObjectChange } from '@mysten/sui/client';
 import { useState } from 'react';
 import { useSignAndExecuteTransaction, useSuiClient, useCurrentAccount } from '@mysten/dapp-kit';
-import { Transaction } from '@mysten/sui/transactions'; // Import Transaction
 import {
     CONTRACT_PACKAGE_VARIABLE_NAME,
     EXPLORER_URL_VARIABLE_NAME,
@@ -240,7 +239,6 @@ export const useUploadAndAssociateGameFileMutation = (options?: {
 
         } catch (error) {
              console.error('Error during game file upload/association:', error);
-            const errorStep = progress.step !== 'idle' && progress.step !== 'success' ? progress.step : 'error';
             setProgress({ step: 'error', isLoading: false, error: (error as Error).message || 'An unknown error occurred' });
             if (notificationId) { toast.dismiss(notificationId); }
             notification.error(error as Error, 'Failed to upload/associate game file');

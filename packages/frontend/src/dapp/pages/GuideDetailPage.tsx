@@ -5,7 +5,6 @@ import { Container, Heading, Text, Card, Flex, Spinner, Box, Callout } from '@ra
 import { formatAddress } from '@mysten/sui/utils';
 import type { SuiObjectData } from '@mysten/sui/client'; // Import SuiObjectData
 import type { GuideData } from '~~/dapp/types/guide.types'; // Import GuideData type
-import { numToAnimalEmoji } from '~~/dapp/helpers/misc'; // For author avatar fallback
 import { Link as RouterLink } from 'react-router-dom'; // Alias Link to avoid conflict with Radix Link
 import { ArrowLeftIcon } from '@radix-ui/react-icons';
 
@@ -70,9 +69,6 @@ export default function GuideDetailPage() {
     });
 
   }, [guideId, suiClient]);
-
-  // Generate a fallback emoji for the author
-  const fallbackEmoji = numToAnimalEmoji(Math.floor(Math.random() * 64) + 1);
 
   return (
     <Container size="3" mt="5">

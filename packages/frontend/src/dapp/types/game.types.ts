@@ -108,8 +108,8 @@ export interface IGame {
   id: { id: ObjectId };
   reward_pool: Balance;
   top_reviews: ObjectId[];
-  reviews: ObjectTable;
-  guides: ObjectTable;
+  reviews: { id: ObjectId };
+  guides: { id: ObjectId };
   recommended_guides: ObjectId[];
   overall_rate: string;
   total_rate: string;

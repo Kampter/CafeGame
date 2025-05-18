@@ -3,9 +3,8 @@ import { useCurrentAccount } from '@mysten/dapp-kit'
 // Adjust import paths for moved components
 import CreateDashboardForm from './CreateDashboardForm'
 import DashboardManager from './DashboardManager'
-import Loading from '~~/components/Loading' 
 import CustomConnectButton from '~~/components/CustomConnectButton'
-import { Flex, Heading, Text, Separator } from '@radix-ui/themes'
+import { Flex, Heading, Separator } from '@radix-ui/themes'
 import { HARDCODED_DASHBOARD_ID } from '~~/dapp/config/network';
 
 // Removed getResponseObjectId helper as it's no longer needed here

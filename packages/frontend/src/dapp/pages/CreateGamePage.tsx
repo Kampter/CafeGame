@@ -1,4 +1,3 @@
-import React from 'react';
 import { Container, Heading } from '@radix-ui/themes';
 import { CreateGameMetadataForm } from '../components/game/CreateGameMetadataForm';
 

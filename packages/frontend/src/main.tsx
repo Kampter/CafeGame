@@ -6,7 +6,7 @@ import './styles/index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ThemeProvider storageKey="cafegame-theme">
+    <ThemeProvider>
       <App />
     </ThemeProvider>
   </React.StrictMode>

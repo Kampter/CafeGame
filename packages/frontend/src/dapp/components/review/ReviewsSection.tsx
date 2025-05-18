@@ -2,15 +2,13 @@ import { FC } from 'react';
 import { Box, Heading, Text, Flex } from '@radix-ui/themes';
 import Loading from '../../../components/Loading';
 import { useFetchReviews } from '../../hooks/useFetchReviews';
-import type { ReviewData } from '~~/dapp/types/review.types';
 import ReviewCard from './ReviewCard';
 
 interface ReviewsSectionProps {
-  gameId: string;
   reviewsTableId: string | undefined; // The ID of the ObjectTable<address, Review>
 }
 
-const ReviewsSection: FC<ReviewsSectionProps> = ({ gameId, reviewsTableId }) => {
+const ReviewsSection: FC<ReviewsSectionProps> = ({ reviewsTableId }) => {
   const { reviews, isLoading, error } = useFetchReviews(reviewsTableId);
 
   console.log('[ReviewsSection] Hook State:', { isLoading, error, reviews, reviewsTableId });

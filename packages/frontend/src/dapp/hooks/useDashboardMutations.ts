@@ -2,7 +2,6 @@ import { SuiSignAndExecuteTransactionOutput } from '@mysten/wallet-standard'
 import {
   useSignAndExecuteTransaction,
 } from '@mysten/dapp-kit'
-import { useState } from 'react'
 import { 
     CONTRACT_PACKAGE_VARIABLE_NAME,
     EXPLORER_URL_VARIABLE_NAME, 

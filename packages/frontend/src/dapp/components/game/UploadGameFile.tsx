@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Button, Card, Flex, Text, Spinner, Box, Heading } from '@radix-ui/themes';
+import { Card, Flex, Text, Spinner, Box, Heading } from '@radix-ui/themes';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { SealClient, getAllowlistedKeyServers } from '@mysten/seal';
 import { WalrusClient } from '@mysten/walrus'; // Assuming walrus SDK is installed

@@ -15,7 +15,6 @@ import { TooltipProvider } from '@radix-ui/react-tooltip'
 import { Theme as RadixTheme } from '@radix-ui/themes'
 import { FC, StrictMode } from 'react'
 import { APP_NAME } from '~~/config/main'
-import { getThemeSettings } from '~~/helpers/theme'
 import useNetworkConfig from '~~/hooks/useNetworkConfig' // 保留这个 Hook
 // import ThemeProvider from '~~/providers/ThemeProvider' // <-- Remove or comment out default import
 import { ThemeProvider as CustomThemeProvider } from '~~/providers/ThemeProvider' // <-- Add named import and alias
@@ -25,7 +24,6 @@ import { ENetwork } from '~~/types/ENetwork'
 import { router } from '~~/dapp/routes/index' // Correct: Import the router instance
 import { RouterProvider } from 'react-router-dom' // Correct: Import the provider component
 
-const themeSettings = getThemeSettings()
 const queryClient = new QueryClient() // 创建 QueryClient 实例
 
 const App: FC = () => {

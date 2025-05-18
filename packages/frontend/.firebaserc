@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "sui-dapp-starter"
-  }
+    "default": "cafegame-4da68"
+  },
+  "targets": {},
+  "etags": {}
 }

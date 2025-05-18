@@ -1,4 +1,4 @@
-import { useSignTransaction, useCurrentAccount, useSuiClient, useSuiClientContext } from '@mysten/dapp-kit';
+import { useSignTransaction, useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { SUI_CLOCK_OBJECT_ID } from '@mysten/sui/utils';
 import { GAME_MODULE_NAME } from '../config/network';

@@ -7,7 +7,6 @@ import { Input } from '~~/components/ui/Input';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '~~/components/ui/Card';
 
 interface CreateReviewFormProps {
-  gameId: string;
   onSubmit: (data: { content: string; rating: number }) => Promise<void>;
 }
 
@@ -16,7 +15,7 @@ interface FormData {
   rating: number;
 }
 
-export const CreateReviewForm: FC<CreateReviewFormProps> = ({ gameId, onSubmit }) => {
+export const CreateReviewForm: FC<CreateReviewFormProps> = ({ onSubmit }) => {
   const { toast } = useToast();
   const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<FormData>();
 

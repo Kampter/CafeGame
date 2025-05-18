@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Box, Heading, Text, Flex, Card, Inset, Button } from '@radix-ui/themes';
+import { Box, Heading, Text, Flex, Card } from '@radix-ui/themes';
 import Loading from '../../../components/Loading';
 import { useFetchGameDetails } from '../../hooks/useFetchGameDetails';
 import { useUserAdminCap } from '../../hooks/useUserAdminCap';
@@ -89,12 +89,12 @@ const GameDetailsFeature: FC<GameDetailsFeatureProps> = ({ gameId }) => {
            >
              <SwiperSlide key="reviews">
                  <Box p="4">
-                      <ReviewsSection gameId={gameId} reviewsTableId={gameData.reviewsTableId} />
+                      <ReviewsSection reviewsTableId={gameData.reviewsTableId} />
                  </Box>
              </SwiperSlide>
              <SwiperSlide key="guides">
                  <Box p="4">
-                      <GuidesSection gameId={gameId} guidesTableId={gameData.guidesTableId} />
+                      <GuidesSection guidesTableId={gameData.guidesTableId} />
                  </Box>
              </SwiperSlide>
              {/* Add more slides here if needed */}

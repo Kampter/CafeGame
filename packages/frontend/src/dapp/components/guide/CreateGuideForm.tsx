@@ -7,7 +7,6 @@ import { Textarea } from '~~/components/ui/Textarea';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '~~/components/ui/Card';
 
 interface CreateGuideFormProps {
-  gameId: string;
   onSubmit: (data: { title: string; content: string }) => Promise<void>;
 }
 
@@ -16,7 +15,7 @@ interface FormData {
   content: string;
 }
 
-export const CreateGuideForm: FC<CreateGuideFormProps> = ({ gameId, onSubmit }) => {
+export const CreateGuideForm: FC<CreateGuideFormProps> = ({ onSubmit }) => {
   const { toast } = useToast();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>();
 

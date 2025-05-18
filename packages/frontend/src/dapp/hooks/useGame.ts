@@ -1,5 +1,5 @@
 import { useSuiClientQuery } from '@mysten/dapp-kit';
-import { IGameFields, ObjectId } from '~~/dapp/types/game'; // Import ObjectId and IGameFields type
+import { IGameFields, ObjectId } from '~~/dapp/types/game.types'; // Corrected path
 
 /**
  * Fetches a specific Game object by its ID.
@@ -26,12 +26,33 @@ const useGame = (gameObjectId: ObjectId | null | undefined) => {
 // Helper to extract game fields safely
 // Adjust based on the actual structure returned by getObject
 export const getGameFields = (data: any): IGameFields | null => {
-    // Check if data and the expected path to fields exist
-    if (!data || !data.data || !data.data.content || !data.data.content.fields) {
+    if (!data?.data?.content?.fields) { // Simplified null check
         return null;
     }
-    // TODO: Add more robust type assertion or validation if necessary
-    return data.data.content.fields as IGameFields;
+    
+    const rawFields = data.data.content.fields;
+    
+    const processedFields: Record<string, any> = { ...rawFields };
+
+    if (rawFields.reviews && typeof rawFields.reviews === 'object' && 
+        rawFields.reviews.fields && typeof rawFields.reviews.fields === 'object' &&
+        rawFields.reviews.fields.id && typeof rawFields.reviews.fields.id === 'object' &&
+        typeof rawFields.reviews.fields.id.id === 'string') {
+        processedFields.reviews = { id: rawFields.reviews.fields.id.id };
+    } else if (rawFields.reviews) {
+        console.warn('[getGameFields] Unexpected structure for reviews:', rawFields.reviews);
+    }
+
+    if (rawFields.guides && typeof rawFields.guides === 'object' &&
+        rawFields.guides.fields && typeof rawFields.guides.fields === 'object' &&
+        rawFields.guides.fields.id && typeof rawFields.guides.fields.id === 'object' &&
+        typeof rawFields.guides.fields.id.id === 'string') {
+        processedFields.guides = { id: rawFields.guides.fields.id.id };
+    } else if (rawFields.guides) {
+        console.warn('[getGameFields] Unexpected structure for guides:', rawFields.guides);
+    }
+    
+    return processedFields as IGameFields;
 }
 
 export default useGame; 

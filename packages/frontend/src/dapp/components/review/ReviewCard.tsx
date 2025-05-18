@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { Box, Text, Flex, IconButton, Tooltip } from '@radix-ui/themes';
 import { ThumbsUp, ThumbsDown, Star } from 'lucide-react';
-import { ReviewData } from '../../types/review.types';
 import { formatDistanceToNow } from 'date-fns';
 import type { ReviewCardProps } from '../../types/review.types';
 

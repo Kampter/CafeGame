@@ -40,11 +40,6 @@ const walrusClient = new WalrusClient({
 
 // --- Type Definitions ---
 
-interface UploadResult {
-    blobId: string;
-    // Potentially include other details if needed later
-}
-
 // Base Walrus Options
 interface UploadOptionsBase {
     epochs?: number;

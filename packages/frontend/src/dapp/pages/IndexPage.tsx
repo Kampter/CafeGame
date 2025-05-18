@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import { Flex, Heading, Text, Button, Grid, Box } from '@radix-ui/themes';
+import { Flex, Heading, Text, Grid, Box } from '@radix-ui/themes';
 // import Layout from '~~/components/layout/Layout' // Remove Layout component
 import NetworkSupportChecker from '../../components/NetworkSupportChecker'
 // import DashboardFeature from '~~/dapp/components/DashboardFeature' // Let's remove this for now

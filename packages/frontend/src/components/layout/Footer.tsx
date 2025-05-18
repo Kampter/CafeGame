@@ -1,20 +1,18 @@
 import {
   useCurrentAccount,
-  useSuiClient,
   useSuiClientContext,
 } from '@mysten/dapp-kit'
 import { Link } from '@radix-ui/themes'
 import { Button } from '../ui/Button'
-import { HeartIcon, SearchIcon, DropletIcon } from 'lucide-react'
+import { SearchIcon, DropletIcon } from 'lucide-react'
 // import ThemeSwitcher from '~~/components/ThemeSwitcher' // Removed
 import {
   CONTRACT_PACKAGE_VARIABLE_NAME,
   EXPLORER_URL_VARIABLE_NAME,
 } from '~~/config/network'
 import { packageUrl } from '~~/helpers/network'
-import { notification } from '~~/helpers/notification'
 import useNetworkConfig from '~~/hooks/useNetworkConfig'
-import { FC, useState } from 'react'
+import { FC } from 'react'
 
 const CustomFaucetButton: FC = () => {
   const currentAccount = useCurrentAccount()
@@ -49,7 +47,6 @@ const Footer: FC = () => {
   const networkVariables = useNetworkVariables()
   const explorerUrl = networkVariables[EXPLORER_URL_VARIABLE_NAME]
   const packageId = networkVariables[CONTRACT_PACKAGE_VARIABLE_NAME]
-  const currentAccount = useCurrentAccount()
 
   return (
     <footer className="flex w-full flex-col items-center justify-between gap-3 p-3 sm:flex-row sm:items-end border-t border-realm-border bg-realm-surface-secondary">

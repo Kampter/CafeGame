@@ -1,6 +1,5 @@
 import { Transaction } from '@mysten/sui/transactions';
-import { ObjectId } from '~~/dapp/types/game'; // Use types consistently
-import { SUI_CLOCK_OBJECT_ID } from '@mysten/sui/utils';
+import { ObjectId } from '~~/dapp/types/game.types'; // Corrected path
 import { CONTRACT_PACKAGE_ID_NOT_DEFINED } from '~~/config/network';
 
 /**

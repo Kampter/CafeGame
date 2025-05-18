@@ -3,9 +3,7 @@ import {
   useSignAndExecuteTransaction,
   useSuiClient,
 } from '@mysten/dapp-kit'
-import { SuiSignAndExecuteTransactionOutput } from '@mysten/wallet-standard'
 import {
-  SuiTransactionBlockResponse,
   SuiTransactionBlockResponseOptions,
 } from '@mysten/sui/client'
 import { Button, TextField } from '@radix-ui/themes'
@@ -68,26 +66,26 @@ const GreetingForm: FC = () => {
                 digest: result.digest,
                 options: WAIT_FOR_TX_OPTIONS,
               })
-              .then((txRes: SuiTransactionBlockResponse) => {
-      notification.txSuccess(
+              .then(() => {
+                notification.txSuccess(
                   transactionUrl(explorerUrl, result.digest),
-        notificationId
-      )
-      refetch()
+                  notificationId
+                )
+                refetch()
               })
               .catch((err: Error) => {
                 console.error('Error waiting for transaction', err)
                 notification.txError(
                   err,
                   'Error waiting for transaction confirmation',
-        notificationId
-      )
+                  notificationId
+                )
               })
-    },
+          },
           onError: (error) => {
             console.error('Create Greeting failed', error)
             notification.txError(error, null, notificationId)
-    },
+          },
         }
       )
     } catch (err) {
@@ -132,7 +130,7 @@ const GreetingForm: FC = () => {
                 digest: result.digest,
                 options: WAIT_FOR_TX_OPTIONS,
               })
-              .then((txRes: SuiTransactionBlockResponse) => {
+              .then(() => {
                 notification.txSuccess(
                   transactionUrl(explorerUrl, result.digest),
                   notificationId
@@ -187,7 +185,7 @@ const GreetingForm: FC = () => {
                 digest: result.digest,
                 options: WAIT_FOR_TX_OPTIONS,
               })
-              .then((txRes: SuiTransactionBlockResponse) => {
+              .then(() => {
                 notification.txSuccess(
                   transactionUrl(explorerUrl, result.digest),
                   notificationId

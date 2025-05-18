@@ -1,9 +1,8 @@
 import {
   useCurrentAccount,
   useCurrentWallet,
-  useSuiClientContext,
 } from '@mysten/dapp-kit'
-import { FC, ReactNode, useMemo } from 'react'
+import { FC, useMemo } from 'react'
 import { isNetworkSupported, supportedNetworks } from '~~/helpers/network'
 import { ENetwork } from '~~/types/ENetwork'
 import type { NetworkSupportCheckerProps } from '~~/types/components.types';

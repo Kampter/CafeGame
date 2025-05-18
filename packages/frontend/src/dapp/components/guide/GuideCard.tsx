@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { Box, Text, Flex, IconButton, Tooltip, Heading } from '@radix-ui/themes';
 import { Heart, Eye } from 'lucide-react';
-import { GuideData } from '../../types/guide.types'; // Assuming GuideData is exported here
 import { formatDistanceToNow } from 'date-fns'; // For relative time
 import type { GuideCardProps } from '../../types/guide.types';
 import { Link } from 'react-router-dom'; // Re-import Link
@@ -10,7 +9,7 @@ import { Link } from 'react-router-dom'; // Re-import Link
 const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
 // Updated badge styling to use realm colors directly
-const getGuideTypeClasses = (type: string) => {
+const getGuideTypeClasses = () => {
     // Base classes for all badges
     const baseClasses = "inline-block rounded-full px-2.5 py-0.5 text-xs font-medium";
     // Consistent realm styling for now, can be differentiated more later
@@ -50,7 +49,7 @@ const GuideCard: FC<GuideCardProps> = ({ guide }) => {
                     </Text>
                </Flex>
            </Box>
-            <span className={`${getGuideTypeClasses(guide.guideType)} flex-shrink-0 ml-2`}> {/* Added ml-2 for spacing */}
+            <span className={`${getGuideTypeClasses()} flex-shrink-0 ml-2`}> {/* Called without arg */}
                 {guide.guideType}
             </span>
         </Flex>
